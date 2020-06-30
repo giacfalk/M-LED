@@ -28,7 +28,7 @@ LIU_Radio.windows([6*60+30,9*60],[18*60,21*60],0.35)
 LIU_TV = LIU.Appliance(LIU,1,70,2,90,0.1,5)
 LIU_TV.windows([0,0],[18*60,24*60],0.35)
 
-LIU_Fan = LIU.Appliance(LIU,1,50,2,300,0.2,15)
+LIU_Fan = LIU.Appliance(LIU,1,50,2,300,0.2,15,occasional_use=0.8)
 LIU_Fan.windows([7*60,9*60],[17*60,20*60],0.35)
 
 LIU_Phone_charger = LIU.Appliance(LIU,2,7,2,240,0.2,10)

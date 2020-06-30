@@ -21,7 +21,7 @@ User_list.append(HI)
 HI_light_bulb = HI.Appliance(HI,6,20,3,120,0.2,10)
 HI_light_bulb.windows([18*60,24*60],[0,30],0.35,[6*60,8*60])
 
-HI_Fan = HI.Appliance(HI,2,50,2,300,0.2,15)
+HI_Fan = HI.Appliance(HI,2,50,2,300,0.2,15,occasional_use=0.8)
 HI_Fan.windows([9*60,21*60],[0,0],0.35)
 
 HI_TV = HI.Appliance(HI,2,70,2,90,0.1,5)

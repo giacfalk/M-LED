@@ -37,7 +37,7 @@ LMIU_DVD.windows([0,0],[18*60,24*60],0.35)
 LMIU_Decoder = LMIU.Appliance(LMIU,1,15,2,90,0.1,5,occasional_use = 0.33)
 LMIU_Decoder.windows([0,0],[18*60,24*60],0.35)
 
-LMIU_Fan = LMIU.Appliance(LMIU,1,50,2,300,0.2,15)
+LMIU_Fan = LMIU.Appliance(LMIU,1,50,2,300,0.2,15,occasional_use=0.6)
 LMIU_Fan.windows([7*60,9*60],[17*60,20*60],0.35)
 
 LMIU_Phone_charger = LMIU.Appliance(LMIU,2,7,2,240,0.2,10)

@@ -22,7 +22,7 @@ User_list.append(HMI)
 HMI_light_bulb = HMI.Appliance(HMI,4,20,3,120,0.2,10)
 HMI_light_bulb.windows([18*60,24*60],[0,30],0.35,[6*60,8*60])
 
-HMI_Fan = HMI.Appliance(HMI,2,50,2,200,0.2,15)
+HMI_Fan = HMI.Appliance(HMI,2,50,2,300,0.2,15,occasional_use=0.4)
 HMI_Fan.windows([10*60,18*60],[0,0],0.35)
 
 HMI_TV = HMI.Appliance(HMI,1,70,2,90,0.1,5)
