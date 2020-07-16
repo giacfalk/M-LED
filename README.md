@@ -1,6 +1,8 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 
-![alt text](https://github.com/giacfalk/PrElGen/blob/master/logo.png?raw=true)
+# M - LED: the Multi-Sectoral Latent Electricity Demand platform
+
+![alt text](https://github.com/giacfalk/M-LED/blob/master/logo.png?raw=true)
 
 ####
 The model has been developed and tested in a Windows 10 environment. 
