@@ -16,7 +16,7 @@ sf = merge(sf, a, by="id")
 sf = merge(sf, b, by="id")
 
 # calculate paved road density in each cluster 
-roads<-read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/onsset/input/roads.shp')
+roads<-read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/onsset/input/Roads/RoadsKEN.shp')
 
 ints = st_intersection(roads, sf)
 roadslenght = tapply(st_length(ints), ints$id,sum)
@@ -33,7 +33,7 @@ sf$traveltime = exact_extract(traveltime, sf, 'mean')
 # calculate employment rate in each cluster
 empl_wealth<-read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/jrc/wealth_employment/shps/sdr_subnational_data_dhs_2014.shp')
 
-sf2 = st_join(sf, empl_wealth, join = st_nn, largest=T)
+sf2 = st_join(sf, empl_wealth, join = st_nn, largest=T, left=T)
 
 # run PCA
 library(FactoMineR)
@@ -52,6 +52,8 @@ data_pca[] <- lapply(data_pca, function(x) {
 
 data_pca <- lapply(data_pca, function(x) round((x-min(x))/(max(x)-min(x)), 2)) %>% bind_cols()
 
+data_pca_bk <- data_pca
+
 data_pca <- prcomp(data_pca)
 
 PCs <- as.data.frame(data_pca$x)
@@ -61,12 +63,32 @@ PCs$PCav <- PCs$PC1
 
 library(scales)
 PCs$PCav <- rescale(PCs$PCav, to = c(0.6, 0.3))
+
+# hist of variables
+
+hist <- data.frame(data_pca_bk, PCs$PCav)
+
+hist$PCs.PCav <- rescale(hist$PCs.PCav, to = c(0, 1))
+
+colnames(hist) <- c("Highest wealth share", "Employment rate", "Population density", "City accessibility", "PCA")
+
+hist <- tidyr::gather(hist, key="var", value="value", 1:5)
+
+a <- ggplot(hist)+
+  geom_histogram(aes(x=value, fill=var), colour="black", lwd=0.01, binwidth = 0.1)+
+  facet_wrap(vars(var))+
+  xlab("Normalised values")+
+  ylab("Count")+
+  theme(legend.position = "none")
+
+ggsave("pca.png", a, device = "png")
+
                   
-sf <- cbind(sf, PCs$PCav)
+sf_prod <- cbind(sf, PCs$PCav)
 
 library(ggplot2)
-ggplot(sf)+
-  geom_sf(aes(fill=PCs.PCav))
+#ggplot(sf)+
+  #geom_sf(aes(fill=PCs.PCav))
 
 
 # import load curve of productive activities
@@ -75,7 +97,7 @@ load_curve_prod_act <- read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Curr
 
 # import load monthly curves of residential
 
-sf_residential = dplyr::select(sf, id, starts_with("PerHHD_")) %>% as.data.frame()
+sf_residential = dplyr::select(sf_prod, id, starts_with("PerHHD_")) %>% as.data.frame()
 sf_residential$geometry = NULL
 sf_residential$PerHHD_tt = NULL
 
@@ -104,7 +126,7 @@ sf_residential = merge(sf_residential,sf_residential_tt, by=c("id", "month"))
 
 sf_residential$value = as.numeric(sf_residential$value_tt)*as.numeric(sf_residential$value)
 
-sf_residential = dplyr::select(sf_residential, hour, value, month) %>% group_by(hour, month) %>% summarise(value=sum(value, na.rm=T)) %>% ungroup()
+sf_residential = dplyr::select(sf_residential, hour, value, month) %>% group_by(hour, month) %>% dplyr::summarise(value=sum(value, na.rm=T)) %>% ungroup()
 
 sf_residential$hour = as.numeric(sf_residential$hour)
 
@@ -122,13 +144,15 @@ load_curve_prod_act$load_curve <- load_curve_prod_act$value * load_curve_prod_ac
 
 for (m in c(1:12)){
   for (h in c(0:23)){
-sf <- mutate(sf, !!paste0("residual_productive_", m, "_", h) := as.numeric(load_curve_prod_act$load_curve[load_curve_prod_act$hour == h & load_curve_prod_act$month == m]))
+    sf_prod <- mutate(sf_prod, !!paste0("residual_productive_", m, "_", h) := as.numeric(load_curve_prod_act$load_curve[load_curve_prod_act$hour == h & load_curve_prod_act$month == m]))
   }}
 
 for (m in c(1:12)){
-  a<-dplyr::select(sf, starts_with("PerHHD_tt_monthly"))[,m] %>% as.data.frame() %>% mutate(geometry=NULL) %>% mutate_all(., .funs = as.numeric) *  sf$PCs.PCav
-    sf <- mutate(sf, !!paste0("residual_productive_tt_", m) := a[,1])
+  a<-dplyr::select(sf_prod, starts_with("PerHHD_tt_monthly"))[,m] %>% as.data.frame() %>% mutate(geometry=NULL) %>% mutate_all(., .funs = as.numeric) *  sf_prod$PCs.PCav
+  sf_prod <- mutate(sf_prod, !!paste0("residual_productive_tt_", m) := a[,1])
   }
+
+sf <- sf_prod
 
 ###
 

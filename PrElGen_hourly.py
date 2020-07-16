@@ -85,7 +85,7 @@ then = time.time()
 #run algorithm of travel-time based clustering
 #subprocess.call(['"C:/Programmi/R/R-3.5.1/bin/Rscript', '--vanilla', home_repo_folder + 'traveltime_based_clustering.r'])
 
-clusters = QgsVectorLayer(home_repo_folder + 'onsset/kenya_clusters/clusters_tt_based.gpkg', "", "ogr")
+clusters = QgsVectorLayer(home_repo_folder + 'clustering/clusters_60min_1km.shp', "", "ogr")
 
 # Add population without access to electricity and electrification level --> Genrated with 30m population in GEE 
 #print(f"Estimating electrification levels. Elapsed time:", round((time.time() - then) / 60, 2), " minutes")
@@ -129,9 +129,9 @@ spread = ((national_official_population-somma)/somma)+1
 print(spread, f"Share of population included (pre adjustment)")
 
 ##Harmonise by homogeneously spreaing the missing population across clusters
-processing.run("qgis:fieldcalculator", {'INPUT': clusters, 'FIELD_NAME': 'popsum', 'FIELD_TYPE': 0, 'FIELD_LENGTH': 10, 'NEW_FIELD': False, 'FORMULA':'\"popsum\" *' + str(spread), 'OUTPUT': processed_folder + 'clusters_2.gpkg'})
+processing.run("qgis:fieldcalculator", {'INPUT': clusters,'FIELD_NAME':'popsum','FIELD_TYPE':0,'FIELD_LENGTH':10,'FIELD_PRECISION':3,'NEW_FIELD':False,'FORMULA':' \"popsum\" * ' + str(spread),'OUTPUT':processed_folder + 'clusters_2.shp'})
 
-clusters = QgsVectorLayer(processed_folder + 'clusters_2.gpkg',"","ogr")
+clusters = QgsVectorLayer(processed_folder + 'clusters_2.shp',"","ogr")
 
 features = clusters.getFeatures()
 
@@ -165,9 +165,9 @@ spread = (((national_official_population*(1-national_official_elrate))-somma)/so
 print(spread, f"Share of population without access included (pre adjustment)")
 
 # Harmonise by homogeneously spreaing the missing population without access across clusters
-processing.run("qgis:fieldcalculator", {'INPUT': clusters, 'FIELD_NAME': 'noaccsum', 'FIELD_TYPE': 0, 'FIELD_LENGTH': 10, 'NEW_FIELD': False, 'FORMULA':'\"noaccsum\" *' + str(spread), 'OUTPUT': processed_folder + 'clusters_3.gpkg'})
+processing.run("qgis:fieldcalculator", {'INPUT': clusters, 'FIELD_NAME': 'noaccsum', 'FIELD_TYPE': 0, 'FIELD_LENGTH': 10, 'NEW_FIELD': False, 'FORMULA':'\"noaccsum\" *' + str(spread), 'OUTPUT': processed_folder + 'clusters_3.shp'})
 
-clusters = QgsVectorLayer(processed_folder + 'clusters_3.gpkg',"","ogr")
+clusters = QgsVectorLayer(processed_folder + 'clusters_3.shp',"","ogr")
 
 features = clusters.getFeatures()
 
@@ -185,30 +185,23 @@ spread = (((national_official_population*(1-national_official_elrate))-somma)/so
 print(spread, f"Share of population without access included (after adjustment)", spread)
 
 # Calculate electrification rate in each cluster
-processing.run("qgis:fieldcalculator", {'INPUT': clusters, 'FIELD_NAME': 'elrate', 'FIELD_TYPE': 0, 'FIELD_LENGTH': 10, 'NEW_FIELD': True, 'FORMULA':' 1-(\"noaccsum\" / \"popsum\") ', 'OUTPUT': processed_folder + 'clusters_4.gpkg'})
+processing.run("qgis:fieldcalculator", {'INPUT': clusters, 'FIELD_NAME': 'elrate', 'FIELD_TYPE': 0, 'FIELD_LENGTH': 10, 'NEW_FIELD': True, 'FORMULA':' 1-(\"noaccsum\" / \"popsum\") ', 'OUTPUT': processed_folder + 'clusters_4.shp'})
 
-clusters = QgsVectorLayer(processed_folder + 'clusters_4.gpkg',"","ogr")
+clusters = QgsVectorLayer(processed_folder + 'clusters_4.shp',"","ogr")
 
 #%%
 # 2) Cropland
 print(f"Processing cropland. Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
 # print(f"Cropping cropland. Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
 
-# processing.run("gdal:cliprasterbyextent",
-               # {'INPUT': cropland_extent, 'PROJWIN': coords,
-                # 'DATA_TYPE': 0,
-                # 'OUTPUT': processed_folder + 'cropland_cropped.tif', 'NODATA': 0})
-
-# cropland_extent = QgsRasterLayer(processed_folder + 'cropland_cropped.tif', "cropland_extent")
-
-# print(f"Reproject cropland to World Mercator (meters). Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
-# processing.run('gdal:warpreproject', {'INPUT' : cropland_extent, 'TARGET_CRS': 'EPSG:3395', 'OUTPUT' : processed_folder + 'cropland_extent_reprojected.tif'})
+print(f"Reproject cropland to World Mercator (meters). Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
+processing.run('gdal:warpreproject', {'INPUT' : cropland_extent, 'TARGET_CRS': 'EPSG:3395', 'OUTPUT' : processed_folder + 'cropland_extent_reprojected.tif'})
 
 # Import it
 cropland_extent_reprojected = QgsRasterLayer(processed_folder + 'cropland_extent_reprojected.tif')
 
 print(f"Reproject clusters to World Mercator (meters). Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
-processing.run('native:reprojectlayer', {'INPUT' : processed_folder + 'clusters_4.gpkg', 'TARGET_CRS': 'EPSG:3395', 'OUTPUT' : processed_folder + 'clusters_5.gpkg'})
+processing.run('native:reprojectlayer', {'INPUT' : processed_folder + 'clusters_4.shp', 'TARGET_CRS': 'EPSG:3395', 'OUTPUT' : processed_folder + 'clusters_5.gpkg'})
 
 # Import them
 clusters = QgsVectorLayer(processed_folder + 'clusters_5.gpkg',"","ogr")
@@ -287,12 +280,12 @@ processing.run("native:joinattributestable", {
         'INPUT': processed_folder + 'clusters_10.gpkg', 'FIELD': 'id',
         'INPUT_2': processed_folder + 'clusters_2.csv',
         'FIELD_2': 'id', 'FIELDS_TO_COPY': ['crshare_sp'], 'METHOD': 1, 'DISCARD_NONMATCHING': False, 'PREFIX': '',
-        'OUTPUT': processed_folder + 'clusters_11.gpkg'})
+        'OUTPUT': processed_folder + 'clusters_11.shp'})
 
 print(f"Downscaling cropland area for each crop to a resolution of 30m. Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
 
 # Zonal and raster calculator for each crop and complete the process with the downscaling (assumption of equal redistribution of cropland for each crop in the cropland area beneath the 1-km resolution ID pixel)
-clusters = QgsVectorLayer(processed_folder + 'clusters_11.gpkg')
+clusters = QgsVectorLayer(processed_folder + 'clusters_11.shp')
 os.chdir(spam_folder + 'spam2010v1r0_global_harv_area.geotiff')
 files = glob.glob('./*r.tif')
 
@@ -301,32 +294,39 @@ for X in files:
     print('iterating' + a)
     processing.run("qgis:zonalstatistics",
                    {'INPUT_RASTER': X, 'RASTER_BAND': 1, 'INPUT_VECTOR': clusters,
-                    'COLUMN_PREFIX': a, 'STATS': [1]})
+                    'COLUMN_PREFIX': a, 'STATS': [1]}, feedback=f)
+
+
+QgsVectorFileWriter.writeAsVectorFormat(clusters, processed_folder +'clusters_2b.csv', 'CP1250', clusters.crs(), 'CSV')
+
+clusters = pandas.read_csv(processed_folder + 'clusters_2b.csv')
 
 # Downscaling
 names = list(map(lambda X: "A_" + X[37:41] + "_sum", files))
-
 for X in names:
-    idx = clusters.fields().lookupField(X)
-    clusters.startEditing()
-    e = QgsExpression('crshare_sp * ' + X)
-    c = QgsExpressionContext()
-    s = QgsExpressionContextScope()
-    s.setFields(clusters.fields())
-    c.appendScope(s)
-    e.prepare(c)
-    for f in clusters.getFeatures():
-        c.setFeature(f)
-        value = e.evaluate(c)
-        atts = {idx: value}
-        clusters.dataProvider().changeAttributeValues({f.id(): atts})
-    clusters.commitChanges()
-    print('iterated' + X)
+    print(X)
+    clusters[X] = clusters['crshare_sp'] * clusters[X]
 
+clusters.to_csv(processed_folder + 'clusters_2c.csv')
+
+clusters = QgsVectorLayer(processed_folder + 'clusters_11.shp')
+field_names = [field.name() for field in clusters.fields()]
+# Use `with edit()` method to edit and commit changes in one go
+with edit(clusters):
+    # Assign count in reverse order for each field which will be used as index
+    for i, j in reversed(list(enumerate(field_names))):
+        if "_sum" in j:
+            clusters.deleteAttribute(i)
+
+processing.run("native:joinattributestable", {
+        'INPUT': clusters, 'FIELD': 'id',
+        'INPUT_2': processed_folder + 'clusters_2c.csv',
+        'FIELD_2': 'id', 'FIELDS_TO_COPY': names, 'METHOD': 1, 'DISCARD_NONMATCHING': False, 'PREFIX': '',
+        'OUTPUT': processed_folder + 'clusters_11b.shp'})
 
 #%%
 # 3) Irrigation water requirements
-clusters = QgsVectorLayer(processed_folder + 'clusters_11.gpkg',"","ogr")
+clusters = QgsVectorLayer(processed_folder + 'clusters_11b.shp',"","ogr")
 
 # Import and process agro-hydrological data (GAEZ) and quantify water requirements for irrigation in each cluster. Legend of climate zones:
 print(f"Define dominant climate zone in each cluster. Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
@@ -426,7 +426,7 @@ clusters.to_csv(processed_folder + 'clusters_4.csv')
 fields_to_copy =  ['IRREQ_year', 'monthly_IRREQ_1', 'monthly_IRREQ_2','monthly_IRREQ_3','monthly_IRREQ_4','monthly_IRREQ_5','monthly_IRREQ_6','monthly_IRREQ_7','monthly_IRREQ_8','monthly_IRREQ_9','monthly_IRREQ_10','monthly_IRREQ_11','monthly_IRREQ_12']
 
 processing.run("native:joinattributestable", {
-        'INPUT': processed_folder + 'clusters_11.gpkg', 'FIELD': 'id',
+        'INPUT': processed_folder + 'clusters_11b.shp', 'FIELD': 'id',
         'INPUT_2': processed_folder + 'clusters_4.csv',
         'FIELD_2': 'id', 'FIELDS_TO_COPY': fields_to_copy, 'METHOD': 1, 'DISCARD_NONMATCHING': False, 'PREFIX': '',
         'OUTPUT': processed_folder + 'clusters_12.gpkg'})
@@ -603,8 +603,8 @@ for i in range(1, 13, 1):
     clusters["q_diff"+ str(i)] = clusters["q"+ str(i)] - clusters["q_sust"+ str(i)]
     # RGH to estimate power for pump (in W), missing the head losses
     clusters['powerforpump'+ str(i)] = (rho* g * clusters['gr_wat_depth_mean']* clusters["q_sust"+ str(i)])/eta_pump
-    clusters['powerforpump'+ str(i)] = numpy.where(clusters["gr_wat_depth_mean"]>15, 0, clusters['powerforpump'+ str(i)])
-    clusters["nogroundwater"] = numpy.where(clusters["gr_wat_depth_mean"]>15, 1, 0)
+    clusters['powerforpump'+ str(i)] = numpy.where(clusters["gr_wat_depth_mean"]>threshold_groundwater_pumping, 0, clusters['powerforpump'+ str(i)])
+    clusters["nogroundwater"] = numpy.where(clusters["gr_wat_depth_mean"]>threshold_groundwater_pumping, 1, 0)
     #  If necessary, and if it is possible, get the difference between q and q_sust from surface water bodies
     # NB: groundwater pumping is always prioritised! 
     clusters["surfw_q"+ str(i)] = numpy.where(clusters["nogroundwater"] == 0, clusters["q_diff"+ str(i)], clusters["q"+ str(i)])
@@ -642,13 +642,13 @@ list1 = [col for col in clusters.columns if 'er_kwh_' in col]
 
 list2 = [col for col in clusters.columns if 'q_sust' in col]
 
-list2.append(list1)
+list2 = list2 + list1
 
 #Write to file
 processing.run("native:joinattributestable", {
         'INPUT': processed_folder + 'clusters_12.gpkg', 'FIELD': 'id',
         'INPUT_2': processed_folder + 'clusters_7.csv',
-        'FIELD_2': 'id', 'FIELDS_TO_COPY': list1, 'METHOD': 1, 'DISCARD_NONMATCHING': False, 'PREFIX': '',
+        'FIELD_2': 'id', 'FIELDS_TO_COPY': list2, 'METHOD': 1, 'DISCARD_NONMATCHING': False, 'PREFIX': '',
         'OUTPUT': processed_folder + 'clusters_13.gpkg'})
 
 clusters = QgsVectorLayer(processed_folder + 'clusters_13.gpkg',"","ogr")

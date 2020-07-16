@@ -1,30 +1,8 @@
-<<<<<<< HEAD
 library(sf)
 library(cowplot)
 library(raster)
 library(ggplot2)
 library(scales)
-
-sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_16.gpkg')
-
-a <- read.csv("D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_8.csv")
-
-b<- read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_16.csv')
-
-a$X=NULL
-b$X=NULL
-
-sf = merge(sf, a, by="id")
-sf = merge(sf, b, by="id")
-
-sf = st_as_sf(sf)
-
-#write_sf(sf, 'D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/clusters_final.gpkg',driver="GPKG")
-
-#sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/clusters_final.gpkg')
-
-setwd('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/results_figures')
-
 
 sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_econ_results.gpkg')
 
@@ -228,7 +206,7 @@ a<- ggplot(sf, aes(x="", y="", fill=MinimumOverall2030))+
 
 ### (partial) CBA ###
 
-sf$dollarsperha <- cut(as.numeric(sf$tt_ddvl)/sf$cr_ha_count, 
+sf$dollarsperha <- cut(as.numeric(sf$profit_yearly)/as.numeric(sf$cr_ha_coun), 
                          breaks = c(0, 100, 250, 500, 1000, 2500, Inf), 
                          labels = c("<100 USD", "100-250 USD", "250-500 USD", "500-1000 USD", "1000 - 2500 USD", ">2500 USD"), right = FALSE)
   

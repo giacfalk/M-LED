@@ -45,10 +45,11 @@ sf_irrig$hour = as.numeric(sf_irrig$hour)
 sf_irrig$month_tt = as.numeric(sf_irrig$month_tt)
 
 irrigation <- ggplot(sf_irrig, aes(x=as.numeric(hour), y=value_irrigation/1000, group=as.factor(month_tt), colour=as.factor(month_tt)))+
+  theme_classic()+
   geom_line(aes(group=as.factor(month_tt), colour=as.factor(month_tt)), size=1)+
   #facet_wrap(~Sector)+
   xlab("Hour")+
-  ylab("MWh consumed")+
+  ylab("MWh consumed (daily avg.)")+
   ggtitle("Irrigation")+
   theme(legend.position = "bottom", legend.direction = "horizontal")+
   scale_colour_discrete(name="Month")
@@ -84,10 +85,11 @@ sf_croppro$hour = as.numeric(sf_croppro$hour)
 sf_croppro$month_tt = as.numeric(sf_croppro$month_tt)
 
 crop_pro <- ggplot(sf_croppro, aes(x=as.numeric(hour), y=value_cropproation/1000, group=as.factor(month_tt), colour=as.factor(month_tt)))+
+  theme_classic()+
   geom_line(aes(group=as.factor(month_tt), colour=as.factor(month_tt)), size=1)+
   #facet_wrap(~Sector)+
   xlab("Hour")+
-  ylab("MWh consumed")+
+  ylab("MWh consumed (daily avg.)")+
   ggtitle("Crop processing")+
   theme(legend.position = "bottom", legend.direction = "horizontal")+
   scale_colour_discrete(name="Month")
@@ -127,10 +129,11 @@ sf_health$hour = as.numeric(sf_health$hour)
 
 
 health<-ggplot(sf_health, aes(x=as.numeric(hour), y=value/1000))+
+  theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
   xlab("Hour")+
-  ylab("MWh consumed")+
+  ylab("MWh consumed (daily avg.)")+
   ggtitle("Healthcare")+
   theme(legend.position = "bottom", legend.direction = "horizontal")+
   scale_colour_discrete(name="Month")
@@ -169,10 +172,11 @@ sf_edu = dplyr::select(sf_edu, hour, value, month) %>% group_by(hour, month) %>%
 sf_edu$hour = as.numeric(sf_edu$hour)
 
 edu<-ggplot(sf_edu, aes(x=as.numeric(hour), y=value/1000))+
+  theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
   xlab("Hour")+
-  ylab("MWh consumed")+
+  ylab("MWh consumed (daily avg.)")+
   ggtitle("Education")+
   theme(legend.position = "bottom", legend.direction = "horizontal")+
   scale_colour_discrete(name="Month")
@@ -212,10 +216,11 @@ sf_residential = dplyr::select(sf_residential, hour, value, month) %>% group_by(
 sf_residential$hour = as.numeric(sf_residential$hour)
 
 residential <-ggplot(sf_residential, aes(x=as.numeric(hour), y=value/1000))+
+  theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
   xlab("Hour")+
-  ylab("MWh consumed")+
+  ylab("MWh consumed (daily avg.)")+
   ggtitle("Residential")+
   theme(legend.position = "bottom", legend.direction = "horizontal")+
   scale_colour_discrete(name="Month")
@@ -256,10 +261,11 @@ sf_residual_productive = dplyr::select(sf_residual_productive, hour, value, mont
 sf_residual_productive$hour = as.numeric(sf_residual_productive$hour)
 
 residual_productive <-ggplot(sf_residual_productive, aes(x=as.numeric(hour), y=value/1000))+
+  theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
   xlab("Hour")+
-  ylab("MWh consumed")+
+  ylab("MWh consumed (daily avg.)")+
   ggtitle("Commercial & prod.")+
   theme(legend.position = "bottom", legend.direction = "horizontal")+
   scale_colour_discrete(name="Month")
@@ -272,7 +278,7 @@ all_sectors <- cowplot::plot_grid(residential + theme(legend.position = "none"),
 
 all_sectors <- cowplot::plot_grid(all_sectors, get_legend(crop_pro), ncol = 1, rel_heights = c(1, 0.15))
 
-ggsave("all.png", all_sectors, device = "png", scale=1.7)
+ggsave("all.png", all_sectors, device = "png", scale=1.2)
 
 Residential<-sum(residential$data$value)*30
 Education<-sum(edu$data$value)*30
@@ -292,6 +298,7 @@ df <- as.data.frame(rbind(Residential, Education, Healthcare, Irrigation, Crop_p
 df$sector<-rownames(df)
 
 barplot <- ggplot(df, aes(x=sector, y=V1/1000000000))+
+  theme_classic()+
   geom_col(aes(fill=sector))+
   scale_y_continuous(name="Yearly unmet electricity demand (TWh)")+
   xlab("Sector")+
@@ -301,81 +308,140 @@ barplot <- ggplot(df, aes(x=sector, y=V1/1000000000))+
 
 ggsave("barplot_sectors.png", barplot, device = "png", scale=1, width = 7, height = 5)
 
+
 ############
 
-fmt_dcimals <- function(decimals=0){
-  # return a function responpsible for formatting the 
-  # axis labels with a given number of decimals 
-  function(x) as.character(round(x,decimals))
-}
+provinces <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/KEN_8_provinces.shp')
 
-sf$geometry <- geogeo
+country <- st_union(provinces) %>% st_as_sf()
 
-sf <- st_as_sf(sf)
+provinces_demo <- provinces
+provinces_demo$geometry=NULL
+provinces_demo = provinces_demo[1,]
+country <- bind_cols(provinces_demo, country) %>% st_as_sf()
+country$CAPTION = " Kenya"
+country$geometry = country$x
+country$x=NULL  
+country = st_as_sf(country)
+st_crs(country) <- 4326
+st_crs(provinces) <- 4326
+provinces <- purrr::reduce(list(provinces, country), sf:::rbind.sf)
 
-sf$residential_demand <- cut((as.numeric(sf$PerHHD_tt) * (as.numeric(sf$noaccsum) / as.numeric(sf$popsum)) * as.numeric(sf$HHs))/1000, breaks = c(-Inf, 1, 5, 15, 30, 50, Inf), 
-                       labels = c("<1", "1-5", "5-15", "15-30", "30-50", ">50"), right = FALSE)
+template <- raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/template_1km.tif')
 
-library(viridis)
-a<- ggplot(sf)+
-  geom_sf(aes(fill=residential_demand), color = NA)+
-  ggtitle("Residential")+
-  scale_fill_viridis(name="MWh", discrete = T)+
-  theme(legend.position = "none")
+sf$geometry=geogeo
+sf = st_as_sf(sf)
 
-sf = mutate(sf, er_kwh_tt = as.numeric(er_kwh_tt1) + as.numeric(er_kwh_tt2) + as.numeric(er_kwh_tt3) + as.numeric(er_kwh_tt4) + as.numeric(er_kwh_tt5) + as.numeric(er_kwh_tt6) + as.numeric(er_kwh_tt7) + as.numeric(er_kwh_tt8) + as.numeric(er_kwh_tt9) + as.numeric(er_kwh_tt10) + as.numeric(er_kwh_tt11) + as.numeric(er_kwh_tt12))
+sf <- mutate(sf, sf_residential_tt = (30 * (as.numeric(PerHHD_tt_monthly_1) + as.numeric(PerHHD_tt_monthly_2) + as.numeric(PerHHD_tt_monthly_3) + as.numeric(PerHHD_tt_monthly_4) + as.numeric(PerHHD_tt_monthly_5) + as.numeric(PerHHD_tt_monthly_6) + as.numeric(PerHHD_tt_monthly_7) + as.numeric(PerHHD_tt_monthly_8) + as.numeric(PerHHD_tt_monthly_9) + as.numeric(PerHHD_tt_monthly_10) + as.numeric(PerHHD_tt_monthly_11) + as.numeric(PerHHD_tt_monthly_12))/1000) * as.numeric(sf$HHs) * (sf$noaccsum/sf$popsum)) 
 
-sf$irrigation_demand <- cut(as.numeric(sf$er_kwh_tt)/1000, breaks = c(-Inf, 1, 5, 15, 30, 50, Inf), labels = c("<1", "1-5", "5-15", "15-30", "30-50", ">50"), right = FALSE)
+#group_by(sf, isurbanmajority) %>% mutate(a=(ifelse(sf_residential_tt>1, sf_residential_tt, NA) * 1000)/(as.numeric(HHs) * (noaccsum/popsum))) %>% summarise(a=mean(a, na.rm=T))
 
-b<- ggplot(sf)+
-  geom_sf(aes(fill=irrigation_demand), color = NA)+
-  ggtitle("Irrigation water pumping")+
-  scale_fill_viridis(name="MWh", discrete = T)+
-  theme(legend.position = "none")
+sf <-sf <- mutate(sf, sf_croppro = (30 * (as.numeric(kwh_cropproc_tt_1) + as.numeric(kwh_cropproc_tt_2) + as.numeric(kwh_cropproc_tt_3) + as.numeric(kwh_cropproc_tt_4) + as.numeric(kwh_cropproc_tt_5) + as.numeric(kwh_cropproc_tt_6) + as.numeric(kwh_cropproc_tt_7) + as.numeric(kwh_cropproc_tt_8) + as.numeric(kwh_cropproc_tt_9) + as.numeric(kwh_cropproc_tt_10) + as.numeric(kwh_cropproc_tt_11) + as.numeric(kwh_cropproc_tt_12))/1000))
 
+sf <-sf <- mutate(sf, sf_irrig = (30 * (as.numeric(er_kwh_tt1) + as.numeric(er_kwh_tt2) + as.numeric(er_kwh_tt3) + as.numeric(er_kwh_tt4) + as.numeric(er_kwh_tt5) + as.numeric(er_kwh_tt6) + as.numeric(er_kwh_tt7) + as.numeric(er_kwh_tt8) + as.numeric(er_kwh_tt9) + as.numeric(er_kwh_tt10) + as.numeric(er_kwh_tt11) + as.numeric(er_kwh_tt12))/1000))
 
+sf$sf_health_tt<-30* as.numeric(sf$er_hc_tt)/1000
 
-sf = mutate(sf, kwh_cropproc_tt_ = as.numeric(kwh_cropproc_tt_1) + as.numeric(kwh_cropproc_tt_2) + as.numeric(kwh_cropproc_tt_3) + as.numeric(kwh_cropproc_tt_4) + as.numeric(kwh_cropproc_tt_5) + as.numeric(kwh_cropproc_tt_6) + as.numeric(kwh_cropproc_tt_7) + as.numeric(kwh_cropproc_tt_8) + as.numeric(kwh_cropproc_tt_9) + as.numeric(kwh_cropproc_tt_10) + as.numeric(kwh_cropproc_tt_11) + as.numeric(kwh_cropproc_tt_12))
+sf$sf_health_tt = ifelse(sf$elrate>0.75, 0, sf$sf_health_tt )
 
+sf$sf_edu_tt<-30* as.numeric(sf$er_sch_tt)/1000
 
-sf$cropproc_demand <- cut(as.numeric(sf$kwh_cropproc_tt_)/1000, breaks = c(-Inf, 1, 5, 15, 30, 50, Inf), labels = c("<1", "1-5", "5-15", "15-30", "30-50", ">50"), right = FALSE)
+sf$sf_edu_tt = ifelse(sf$elrate>0.75, 0, sf$sf_edu_tt )
 
-c<- ggplot(sf)+
-  geom_sf(aes(fill=cropproc_demand), color = NA)+
-  ggtitle("Crop processing")+
-  scale_fill_viridis(name="MWh", discrete = T)+
-  theme(legend.position = "none")
+sf = mutate(sf, sf_residual_productive_tt = (30 * (as.numeric(residual_productive_tt_1) + as.numeric(residual_productive_tt_2) + as.numeric(residual_productive_tt_3) + as.numeric(residual_productive_tt_4) + as.numeric(residual_productive_tt_5) + as.numeric(residual_productive_tt_6) + as.numeric(residual_productive_tt_7) + as.numeric(residual_productive_tt_8) + as.numeric(residual_productive_tt_9) + as.numeric(residual_productive_tt_10) + as.numeric(residual_productive_tt_11) + as.numeric(residual_productive_tt_12))/1000)* as.numeric(sf$HHs) * (sf$noaccsum/sf$popsum))
 
+sf_residential_tt <- fasterize::fasterize(sf, template, field ="sf_residential_tt", fun="sum")
 
-sf$health_demand <- cut((as.numeric(sf$er_hc_tt))/1000, breaks = c(-Inf, 1, 5, 15, 30, 50, Inf), labels = c("<1", "1-5", "5-15", "15-30", "30-50", ">50"), right = FALSE)
+sf_croppro <- fasterize::fasterize(sf, template, field ="sf_croppro", fun="sum")
 
-sf$school_demand <- cut((as.numeric(sf$er_sch_tt))/1000, breaks = c(-Inf, 1, 5, 15, 30, 50, Inf), labels = c("<1", "1-5", "5-15", "15-30", "30-50", ">50"), right = FALSE)
+sf_irrig <- fasterize::fasterize(sf, template, field ="sf_irrig", fun="sum")
 
+sf_health_tt <- fasterize::fasterize(sf, template, field ="sf_health_tt", fun="sum")
 
-d<- ggplot(sf)+
-  geom_sf(aes(fill=health_demand), color = NA)+
-  ggtitle("Healthcare facilities")+
-  scale_fill_viridis(name="MWh", discrete = T)+
-  theme(legend.position = "none")
+sf_edu_tt <- fasterize::fasterize(sf, template, field ="sf_edu_tt", fun="sum")
 
-e<- ggplot(sf)+
-  geom_sf(aes(fill=school_demand), color = NA)+
-  ggtitle("Education")+
-  scale_fill_viridis(name="MWh", discrete = T)+
+sf_residual_productive_tt <- fasterize::fasterize(sf, template, field ="sf_residual_productive_tt", fun="sum")
+
+provinces$Residential <- exactextractr::exact_extract(sf_residential_tt, provinces, fun="sum")
+provinces$Education<- exactextractr::exact_extract(sf_edu_tt, provinces, fun="sum")
+provinces$Healthcare<- exactextractr::exact_extract(sf_health_tt, provinces, fun="sum")
+provinces$Irrigation<- exactextractr::exact_extract(sf_irrig, provinces, fun="sum")
+provinces$Crop_processing<- exactextractr::exact_extract(sf_croppro, provinces, fun="sum")
+provinces$Comm_prod<- exactextractr::exact_extract(sf_residual_productive_tt, provinces, fun="sum")
+
+provinces <- gather(provinces, key = "sector", value = "value", 6:11)
+
+barplot_prov <- ggplot(provinces, aes(x=CAPTION, y=value/100000000))+
+  theme_classic()+
+  geom_bar(aes(fill=sector), position = "stack", stat = "identity", colour="black", lwd=0.01)+
+  scale_y_continuous(name="Yearly latent electricity demand (TWh)")+
+  xlab("Province")+
+  scale_fill_discrete(name="Sector")+
   theme(legend.position = "bottom", legend.direction = "horizontal")
 
-sf = mutate(sf, residual_productive = as.numeric(residual_productive_tt_1) + as.numeric(residual_productive_tt_2) + as.numeric(residual_productive_tt_3) + as.numeric(residual_productive_tt_4) + as.numeric(residual_productive_tt_5) + as.numeric(residual_productive_tt_6) + as.numeric(residual_productive_tt_7) + as.numeric(residual_productive_tt_8) + as.numeric(residual_productive_tt_9) + as.numeric(residual_productive_tt_10) + as.numeric(residual_productive_tt_11) + as.numeric(residual_productive_tt_12))
+ggsave("provinces.png", barplot_prov, device = "png")
 
-sf$residual_productive <- cut((as.numeric(sf$residual_productive) * (as.numeric(sf$noaccsum) / as.numeric(sf$popsum)) * as.numeric(sf$HHs))/1000, breaks = c(-Inf, 1, 5, 15, 30, 50, Inf), 
-                             labels = c("<1", "1-5", "5-15", "15-30", "30-50", ">50"), right = FALSE)
+provinces_without = provinces
+provinces_without$geometry=NULL
 
-f<- ggplot(sf)+
-  geom_sf(aes(fill=residual_productive), color = NA)+
-  ggtitle("Commercial and productive")+
-  scale_fill_viridis(name="MWh", discrete = T)+
-  theme(legend.position = "none")
+View(provinces_without %>% group_by(CAPTION) %>% summarise(value=sum(value/100000000)))
+View(provinces_without %>% group_by(sector, CAPTION) %>% summarise(value=sum(value/100000000)))
 
-ggsave(plot_grid(plot_grid(a, b, c, d,  e + theme(legend.position = "none"), f, ncol = 3), get_legend(e), ncol = 1, rel_heights = c(1, 0.15)), filename = "sectoral_loads.png", device="png", scale=2, height = 4, width = 4)
+map_regions <- ggplot(provinces, aes(fill=CAPTION))+
+  theme_classic()+
+  geom_sf()+
+  scale_fill_brewer(palette = "Set2", name="Regions")
+
+ggsave("regions_map.png", map_regions, device = "png")
+
+# plot on a fishnet of 1x1 km
+template <- raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/template_1km.tif')
+
+# raster to polygons (sf)
+provinces <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/KEN_8_provinces.shp')
+
+grd <- sf::st_make_grid(provinces, cellsize = 0.0083, square = T, what = "polygons", crs = 4326)
+grd <- st_as_sf(grd)
+
+# extract sum, by sector
+grd$Residential <- exactextractr::exact_extract(sf_residential_tt, grd, fun="sum")
+grd$Education<- exactextractr::exact_extract(sf_edu_tt, grd, fun="sum")
+grd$Healthcare<- exactextractr::exact_extract(sf_health_tt, grd, fun="sum")
+grd$Irrigation<- exactextractr::exact_extract(sf_irrig, grd, fun="sum")
+grd$Crop_processing<- exactextractr::exact_extract(sf_croppro, grd, fun="sum")
+grd$Comm_prod<- exactextractr::exact_extract(sf_residual_productive_tt, grd, fun="sum")
+
+# Plot 
+r <- stack(sf_residential_tt, sf_irrig, sf_croppro, sf_health_tt, sf_edu_tt, sf_residual_productive_tt)
+
+names(r) <- c("Residential", "Irrigation", "Crop_processing", "Healthcare", "Education", "Productive_commercial")
+
+ext <- as.vector(extent(r))
+
+library(maps)  
+library(mapdata)
+library(maptools)
+
+boundaries <- map('worldHires', fill=TRUE,
+                  xlim=ext[1:2], ylim=ext[3:4],
+                  plot=FALSE)
+
+IDs <- sapply(strsplit(boundaries$names, ":"), function(x) x[1])
+bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
+                             proj4string=CRS(projection(r)))
+
+my.at <- c(0.1, 0.5, 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000)
+my.brks=seq(0.1, 25000, by=1666.667)
+myColorkey <- list(at=my.brks, labels=list(at=my.brks, labels=my.at), space="bottom")
+
+YlOrRdTheme <- rasterTheme(panel.background = list(col='white'))
+
+png("map.png", width=1800, height=1200, res=150)
+print(levelplot(r, xlim=c(34, 42), ylim=c(-5, 5),
+                main="Yearly sectoral latent demand (MWh/km2)", at=my.at, colorkey=myColorkey, xlab="Longitude", ylab="Latitude", par.settings = YlOrRdTheme) + layer(sp.polygons(bPols, lwd=0.1, col='black')))
+dev.off()
+
+
 
 ###
 

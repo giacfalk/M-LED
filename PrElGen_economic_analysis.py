@@ -227,20 +227,23 @@ clusters['appliances_cost'] = numpy.where(clusters['isurbanmajority'] ==1, (urb1
 # 5) Model cost of groundwater pump 
 # 5.1. estimate the cost curve that links hydraulic head H_i and the pumping capacity required Q_i based on the meta-analysis of the costs of groundwater development projects in Sub-Saharan Africa carried out in  Xenarios and Pavelic (2013).
 
-costs = pandas.read_csv(input_folder + 'pumps_cost.csv')
+subprocess.call(['"C:/Programmi/R/R-3.5.1/bin/Rscript', '--vanilla', home_repo_folder + 'groundwater_pumps_costs.r"'])
 
-import statsmodels.formula.api as sm
-result = sm.ols(formula="FC_Qsec ~ H ", data=costs).fit()
+# 5.2 estimate the total cost of pumps in each cluster based on q and h
 
-# 5.2 estimate the installation cost of pumps in each cluster based on q, h e P
-clusters['FC_pumping'] = clusters['gr_wat_depth_mean']*result.params[1] + result.params[0]
-clusters['FC_pumping'] = clusters['FC_pumping'] * clusters['q_sust']
+mean_q_pump = 0.002500002 # 9 m3/h
+SD = 0.002047534
+Q1 = mean_q_pump - 0.675 * SD
+Q3 = mean_q_pump + 0.675 * SD
 
-# 5.3 estimate the variable cost
-clusters['VC_pumping_yearly'] = (clusters['MinimumOverallLCOE2030']*clusters['sf_irrig.er_kwh_tt'])
 
-# 5.4 estimate the total cost
-clusters['TC_pumping'] = clusters['FC_pumping'] + clusters['VC_pumping_yearly']
+clusters['q_sust'] = clusters[[col for col in clusters if col.startswith('q_sust')]].max(axis=1)
+
+clusters['n_pumps_Q1'] = (0.33 * clusters['q_sust'])/Q1
+clusters['n_pumps_M'] = (0.33 * clusters['q_sust'])/mean_q_pump
+clusters['n_pumps_Q3'] = (0.33 * clusters['q_sust'])/Q3
+
+clusters['TC_pumping'] = ((clusters['gr_wat_depth_mean'] * 228.1071)  + (Q1*823975) + (-21312.3*Q1*clusters['gr_wat_depth_mean']) -223.0523)*clusters['n_pumps_Q1'] + ((clusters['gr_wat_depth_mean'] * 228.1071)  + (Q3*823975) + (-21312.3*Q3*clusters['gr_wat_depth_mean']) -223.0523)*clusters['n_pumps_Q3'] + ((clusters['gr_wat_depth_mean'] * 228.1071)  + (mean_q_pump*823975) + (-21312.3*mean_q_pump*clusters['gr_wat_depth_mean']) -223.0523)*clusters['n_pumps_M']
 
 # 6) Cost of purchasing healthcare and education appliances
 #clusters['hc_appliances_cost'] = clusters['tier1'] * hc_1_app_cost + clusters['tier2'] * hc_2_app_cost + clusters['tier34']* 0.6 * hc_3_app_cost + clusters['tier34'] * 0.3 * hc_4_app_cost + clusters['tier34'] * 0.1 * hc_5_app_cost
@@ -271,9 +274,11 @@ clusters['TC_pumping'] = clusters['FC_pumping'] + clusters['VC_pumping_yearly']
 clusters['tt_ddvl'] = numpy.where(clusters['transp_costs']>clusters['tt_ddvl'], 0, clusters['tt_ddvl'] )
 clusters['transp_costs'] = numpy.where(clusters['transp_costs']>clusters['tt_ddvl'], 0, clusters['transp_costs'] )
 
-clusters['profit_yearly'] = clusters['tt_ddvl'] - clusters['transp_costs'] #- clusters['TC_pumping'] #- clusters['processing_cost']
-clusters['profit_yearly'] = numpy.where(clusters['profit_yearly']<0, 0, clusters['profit_yearly'])
+lifetimepump = 20
+discount_rate = 0.15
 
+clusters['profit_yearly'] = clusters['tt_ddvl'] - clusters['transp_costs'] - clusters['TC_pumping']/(1+discount_rate)**lifetimepump 
+clusters['profit_yearly'] = numpy.where(clusters['profit_yearly']<0, 0, clusters['profit_yearly'])
 clusters['investmentreq'] = clusters['InvestmentCost2025'] + clusters['InvestmentCost2030']
 
 # 9) Paybacktime of electrification in each cluster
@@ -285,7 +290,7 @@ clusters['noaccsum'][clusters.PBT < 5].sum()  / clusters['noaccsum'].sum()
 
 clusters.to_csv(processed_folder + 'clusters_econ4.csv')
 
-field_to_copy = ['profit_yearly', 'investmentreq', 'PBT', 'appliances_cost', 'transp_costs', 'tt_ddvl', 'TC_pumping']
+field_to_copy = ['transp_costs', 'TC_pumping', 'profit_yearly']
 
 processing.run("native:joinattributestable", {
         'INPUT': processed_folder + 'clusters_24.gpkg', 'FIELD': 'id',

@@ -1,7 +1,3 @@
-### add urbanisation
-### fix csv file names etc in coherence with python script
-### integration to call this script directly from python
-
 library(tidyverse)
 
 y = read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_train.csv')
@@ -11,7 +7,7 @@ y['acc_pop_share_t2'] = y['acc_pop_t2'] / (y['acc_pop_t1'] + y['acc_pop_t2'] + y
 y['acc_pop_share_t3'] = y['acc_pop_t3'] / (y['acc_pop_t1'] + y['acc_pop_t2'] + y['acc_pop_t3'] + y['acc_pop_t4'])
 y['acc_pop_share_t4'] = y['acc_pop_t4'] / (y['acc_pop_t1'] + y['acc_pop_t2'] + y['acc_pop_t3'] + y['acc_pop_t4'])
 
-y = y %>% dplyr::select('acc_pop_share_t1', 'acc_pop_share_t2', 'acc_pop_share_t3', 'acc_pop_share_t4', 'HCWIXQPLOW', 'HCWIXQP2ND', 'HCWIXQPMID', 'HCWIXQP4TH', 'HCWIXQPHGH', 'popdens') %>% as.data.frame()
+y = y %>% dplyr::select('acc_pop_share_t1', 'acc_pop_share_t2', 'acc_pop_share_t3', 'acc_pop_share_t4', 'HCWIXQPLOW', 'HCWIXQP2ND', 'HCWIXQPMID', 'HCWIXQP4TH', 'HCWIXQPHGH', 'popdens', 'isurbanmaj', 'ISO') %>% as.data.frame()
 
 y2 = y[complete.cases(y), ]
 
@@ -24,14 +20,18 @@ test.hex <- y2[splitSample==2,]
 library(randomForestSRC)
 pr = rfsrc(Multivar(acc_pop_share_t1, acc_pop_share_t2, acc_pop_share_t3, acc_pop_share_t4)~.,data = train.hex, importance=T)
 
+print(pr)
+
 prediction <- predict.rfsrc(pr, test.hex)
 
 ##########
 clusters = read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_predict.csv')
 
 clusters$popdens = clusters$popsum/clusters$Area
+clusters$ISO = as.factor("KE")
+clusters = clusters %>% dplyr::select('HCWIXQPLOW', 'HCWIXQP2ND', 'HCWIXQPMID', 'HCWIXQP4TH', 'HCWIXQPHGH', 'popdens', 'id', 'ISO', 'isurbanmajority') %>% as.data.frame()
 
-clusters = clusters %>% dplyr::select('HCWIXQPLOW', 'HCWIXQP2ND', 'HCWIXQPMID', 'HCWIXQP4TH', 'HCWIXQPHGH', 'popdens', 'id') %>% as.data.frame()
+clusters$isurbanmaj <- clusters$isurbanmajority
 
 # 
 clusters =clusters[complete.cases(clusters), ]
