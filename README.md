@@ -27,7 +27,7 @@ The platform has been developed and tested in a Windows 10 environment.
 ####
 
 [Customising the analysis]:
-* See the repo's Wiki* 
+-> See the repo's Wiki (https://github.com/giacfalk/M-LED/wiki)
 
 ####
 [Examining the results]:
