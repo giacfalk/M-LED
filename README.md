@@ -1,31 +1,40 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 
-![alt text](https://github.com/giacfalk/PrElGen/blob/master/logo.png?raw=true)
+# M - LED: the Multi-Sectoral Latent Electricity Demand platform
+
+![alt text](https://github.com/giacfalk/M-LED/blob/master/logo.png?raw=true)
 
 ####
-The model has been developed and tested in a Windows 10 environment. 
+The platform has been developed and tested in a Windows 10 environment. 
+
+[Downloading the input data]:
+- Download the MLED_database.zip file from the M-LED Zenodo repository [https://zenodo.org/...] and unzip it to a path on your local machine. The folder contains data for replicating the Kenya country study illustrated in the '' paper, as well as an 'data_sources.txt' instructions file to support for retrieving data for other countries' data. 
+
+####
 
 [Setting up the environment]:
-- Install QGIS (v3.8+) via OSGeo4W network installer (http://qgis.org/). In the installation process, choose the 'advanced mode' and make sure you install qgis, saga-ltr, grass-gis, and python-tckl. 
-- Clone this GitHub repository and uncompress the zip archive.
-- Launch the 'installdependencies.cmd' file. This will call Python from the command prompt to install the required Python libraries, if they are not already installed on your computer. 
-
-####
-[Downloading the input data]:
-- Download the input_folder from the PrElGen Zenodo repository: [https://zenodo.org/...]
+- NB: this step is only necessary when setting up the environment for the first time. 
+- The M-LED platform requires PyQGIS (Python + QGIS algorithm toolbox) and R. A handy automatic wizard batch file ("installdependencies.bat") is included in the root of the M-LED repository. The file ensures that the software requirements are met on the local machine, and if they are not, it prompts the user to automatically download and install the required software and libraries. 
+- The batch will prompt the user for the path where you unzipped the MLED_database.
 
 ####
 [Running the analysis]:
-- Launch QGIS. Open the Python Console from the 
-- Make sure you have enough free space on your hard drive. Usually at least 20 gigabytes are necessary for the temporary processing. Note that after the conclusion of the data processing, this space will be freed up.
-- Manually edit the 'manualparameters.py' file (the file is commented extensively to support the user in this operation)
-- Run the PrElGen.py script. 
-- You will be prompted several times, with the following questions:
-  - ....
-  
+- Open QGIS and start the Python Console [https://www.qgistutorials.com/it/_images/642.png] from the top menu (Plugins -> Python Console).
+- Navigate to the path where the cloned repository is located and open the 'wrapper.py' file.
+- Click 'Run'
+- Wait (depending on your machine's processing speed this might take up to some hours)
+
 ####
-[Analysing the results]:
-- PrElGen produces an array of default graphs and statistics, which are inserted in the 'output_figures' folder.
+
+[Customising the analysis]:
+-> See the repo's Wiki (https://github.com/giacfalk/M-LED/wiki)
+
+####
+[Examining the results]:
+The results of the M-LED platform constist of:
+- A geodatabase (clusters_final.gpkg)
+- A collection of raster files (*.tif) with hourly, sector-specific, monthly-variant loads
+- Figures summarising the results in the 'results_figures' folder in the repo home folder.
 
 ####
 [Support]:
