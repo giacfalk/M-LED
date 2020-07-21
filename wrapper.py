@@ -4,21 +4,15 @@
 
 ####
 import os
-os.chdir('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/')
+os.chdir(home_repo_folder)
 
 print("Importing modules and scenario parameters")
 exec(open("./manual_parameters.py").read(), globals())
 exec(open("./backend.py").read(), globals())
 exec(open("./scenario_baseline.py").read(), globals())
 
-time_res = input('Generate yearly "y" or hourly demand "h"?')
-
-if time_res == "y":
-	print("Running PrElGen (yearly)")
-	exec(open("./PrElGen.py").read(), globals())
-else:
-	print("Running PrElGen (hourly)")
-	exec(open("./jrc/PrElGen_JRC.py").read(), globals())
+print("Running PrElGen (hourly)")
+exec(open("./PrElGen_hourly.py").read(), globals())
 
 print("Adding electrification variables")
 exec(open("./to_onsset.py").read(), globals())

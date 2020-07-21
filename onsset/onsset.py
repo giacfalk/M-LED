@@ -10,8 +10,6 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from openpyxl import load_workbook
 
-home_repo_folder = 'D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/'
-
 root = tk.Tk()
 root.withdraw()
 root.attributes("-topmost", True)

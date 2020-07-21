@@ -7,10 +7,13 @@ library(tidyr)
 library(tidyverse)
 library(sf)
 
+desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
+home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
 
-sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_econ_results.gpkg')
+sf <- read_sf(paste0(db_folder, '/processed_folder/clusters_econ_results.gpkg'))
 
-setwd('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/results_figures')
+setwd(paste0(home_repo_folder, '/results_figures'))
 
 # Plot  
 
@@ -46,7 +49,7 @@ a<- ggplot(sf_agri)+
 ggsave("maxyields.png", a, device = "png")
 
 # B Maximum theretical yield
-template <- raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/template_1km.tif')
+template <- raster(paste0(db_folder, '/input_folder/template_1km.tif'))
 
 sf$dollarsperha <- as.numeric(sf$profit_yearly)/as.numeric(sf$cr_ha_coun)
 

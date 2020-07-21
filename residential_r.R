@@ -1,6 +1,10 @@
 library(tidyverse)
 
-y = read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_train.csv')
+desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
+home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+
+y = read.csv(paste0(db_folder, '/processed_folder/clusters_train.csv'))
 
 y['acc_pop_share_t1'] = y['acc_pop_t1'] / (y['acc_pop_t1'] + y['acc_pop_t2'] + y['acc_pop_t3'] + y['acc_pop_t4'])
 y['acc_pop_share_t2'] = y['acc_pop_t2'] / (y['acc_pop_t1'] + y['acc_pop_t2'] + y['acc_pop_t3'] + y['acc_pop_t4'])
@@ -25,7 +29,7 @@ print(pr)
 prediction <- predict.rfsrc(pr, test.hex)
 
 ##########
-clusters = read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_predict.csv')
+clusters = read.csv(paste0(db_folder, '/processed_folder/clusters_predict.csv'))
 
 clusters$popdens = clusters$popsum/clusters$Area
 clusters$ISO = as.factor("KE")
@@ -47,7 +51,7 @@ clusters = clusters %>% dplyr::select(-HCWIXQPLOW, -HCWIXQP2ND, -HCWIXQPMID, -HC
 
 clusters$id = as.character(clusters$id)
 
-clusters2 = read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_predict.csv')
+clusters2 = read.csv(paste0(db_folder, '/processed_folder/clusters_predict.csv'))
 
 clusters2$id = as.character(clusters2$id)
 
@@ -56,4 +60,4 @@ clusters2 = merge(clusters, clusters2, by="id")
 #
 clusters2$id = as.character(clusters2$id)
 
-write.csv(clusters2, 'D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_predict.csv')
+write.csv(clusters2, paste0(db_folder, '/processed_folder/clusters_predict.csv'))

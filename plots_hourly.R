@@ -7,7 +7,11 @@ library(tidyr)
 library(tidyverse)
 library(sf)
 
-setwd('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/results_figures')
+desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
+home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+
+setwd(paste0(home_repo_folder, 'results_figures'))
 
 geogeo <- sf$geometry
 
@@ -311,7 +315,7 @@ ggsave("barplot_sectors.png", barplot, device = "png", scale=1, width = 7, heigh
 
 ############
 
-provinces <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/KEN_8_provinces.shp')
+provinces <- read_sf(paste0(db_folder, '/input_folder/KEN_8_provinces.shp'))
 
 country <- st_union(provinces) %>% st_as_sf()
 
@@ -327,7 +331,7 @@ st_crs(country) <- 4326
 st_crs(provinces) <- 4326
 provinces <- purrr::reduce(list(provinces, country), sf:::rbind.sf)
 
-template <- raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/template_1km.tif')
+template <- raster(paste0(db_folder, '/input_folder/template_1km.tif'))
 
 sf$geometry=geogeo
 sf = st_as_sf(sf)
@@ -395,10 +399,10 @@ map_regions <- ggplot(provinces, aes(fill=CAPTION))+
 ggsave("regions_map.png", map_regions, device = "png")
 
 # plot on a fishnet of 1x1 km
-template <- raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/template_1km.tif')
+template <- raster(paste0(db_folder, '/input_folder/template_1km.tif'))
 
 # raster to polygons (sf)
-provinces <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/KEN_8_provinces.shp')
+provinces <- read_sf(paste0(db_folder, '/input_folder/KEN_8_provinces.shp'))
 
 grd <- sf::st_make_grid(provinces, cellsize = 0.0083, square = T, what = "polygons", crs = 4326)
 grd <- st_as_sf(grd)
@@ -445,11 +449,11 @@ dev.off()
 
 ###
 
-sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_16.gpkg') 
+sf <- read_sf(paste0(db_folder, '/processed_folder/clusters_16.gpkg'))
 
-a <- read.csv("D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_8.csv") %>% dplyr::select(starts_with("kwh_cropproc_tt"), id)
+a <- read.csv(paste0(db_folder, '/processed_folder/clusters_8.csv") %>% dplyr::select(starts_with("kwh_cropproc_tt"), id))
 
-b<- read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_16.csv')
+b<- read.csv(paste0(db_folder, '/processed_folder/clusters_16.csv'))
 
 a$X=NULL
 b$X=NULL
@@ -472,7 +476,7 @@ sf_croppro = dplyr::select(sf, starts_with("kwh_cropproc_tt")) %>% mutate(geomet
 
 sf2 = cbind(sf2, sf$PerHHD_tt, sf$er_hc_tt, sf$er_sch_tt, sf_irrig$er_kwh_tt, sf_croppro$kwh_cropproc_tt)
 
-write_sf(sf2, 'D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/clusters_final.gpkg',driver="GPKG")
+write_sf(sf2, paste0(home_repo_folder, 'clusters_final.gpkg',driver="GPKG"))
 
 
 

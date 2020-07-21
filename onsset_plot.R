@@ -1,9 +1,17 @@
 library(tidyverse)
 library(ggplot2)
 
-residential<-read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/onsset/results/ke-1-0_0_0_0_0_0_summary.csv') %>% mutate(Scenario="Residential")
+desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
+home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+
+desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
+home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+
+residential<-read.csv(paste0(home_repo_folder, 'onsset/results/ke-1-0_0_0_0_0_0_summary.csv')) %>% mutate(Scenario="Residential")
   
-all<-read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/onsset/results/ke-1-0_1_0_0_1_0_summary.csv') %>% mutate(Scenario="All")
+all<-read.csv(paste0(home_repo_folder, 'onsset/results/ke-1-0_1_0_0_1_0_summary.csv')) %>% mutate(Scenario="All")
 
 scenarios <- rbind(residential, all)
 

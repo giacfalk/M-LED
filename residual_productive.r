@@ -3,11 +3,17 @@ library(sf)
 library(tidyverse)
 library(raster)
 library(rgeos)
-sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_16.gpkg') 
 
-a <- read.csv("D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_8.csv") %>% dplyr::select(starts_with("kwh_cropproc_tt"), id)
+desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
+home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
 
-b<- read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_16.csv')
+
+sf <- read_sf(paste0(db_folder, '/processed_folder/clusters_16.gpkg'))
+
+a <- read.csv(paste0(db_folder, '/processed_folder/clusters_8.csv") %>% dplyr::select(starts_with("kwh_cropproc_tt"), id))
+
+b<- read.csv(paste0(db_folder, '/processed_folder/clusters_16.csv'))
 
 a$X=NULL
 b$X=NULL
@@ -16,7 +22,7 @@ sf = merge(sf, a, by="id")
 sf = merge(sf, b, by="id")
 
 # calculate paved road density in each cluster 
-roads<-read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/onsset/input/Roads/RoadsKEN.shp')
+roads<-read_sf(paste0(home_repo_folder, '/onsset/input/Roads/RoadsKEN.shp'))
 
 ints = st_intersection(roads, sf)
 roadslenght = tapply(st_length(ints), ints$id,sum)
@@ -24,14 +30,14 @@ sf$roadslenght = rep(0,nrow(sf))
 sf$roadslenght[match(names(roadslenght),sf$id)] = roadslenght
 
 # calculate travel time to 50 k in each cluster
-traveltime <- raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/travel.tif')
+traveltime <- raster(paste0(db_folder, '/input_folder/travel.tif'))
 
 library(exactextractr)
 
 sf$traveltime = exact_extract(traveltime, sf, 'mean')
 
 # calculate employment rate in each cluster
-empl_wealth<-read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/jrc/wealth_employment/shps/sdr_subnational_data_dhs_2014.shp')
+empl_wealth<-read_sf(paste0(home_repo_folder, '/jrc/wealth_employment/shps/sdr_subnational_data_dhs_2014.shp'))
 
 sf2 = st_join(sf, empl_wealth, join = st_nn, largest=T, left=T)
 
@@ -93,7 +99,7 @@ library(ggplot2)
 
 # import load curve of productive activities
 
-load_curve_prod_act <- read.csv('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/productive profile.csv')
+load_curve_prod_act <- read.csv(paste0(db_folder, '/input_folder/productive profile.csv'))
 
 # import load monthly curves of residential
 

@@ -9,8 +9,6 @@ root = tk.Tk()
 root.withdraw()
 root.attributes("-topmost", True)
 
-home_repo_folder = 'D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/'
-
 specs_path = specs_path = home_repo_folder + 'onsset/specs_KEN.xlsx'
 
 # RUN_PARAM: Insert the name of the country you are working on. More countries should be separated using comma e.g. ["Malawi", "Ghana"]

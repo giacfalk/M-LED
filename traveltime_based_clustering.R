@@ -25,13 +25,18 @@ library(rgdal)
 library(rgeos)
 library(nngeo)
 
-pop = raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/Population.tif')
+desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
+home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+
+
+pop = raster(paste0(db_folder, '/input_folder/Population.tif'))
 pop <- aggregate(pop, fact=30, fun=sum, na.rm=TRUE)
 pop[pop<=0] = NA
 
 totalpopconstant = cellStats(pop, 'sum', na.rm = TRUE)
 
-setwd('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Inequal accessibility to services in sub-Saharan Africa')
+setwd(paste0(db_folder, '/input_folder))
 T.filename <- 'study.area.T_kenya.rds'
 T.GC.filename <- 'study.area.T.GC_kenya.rds'
 friction <- raster("friction_cut_1209.tif")
@@ -92,7 +97,7 @@ repeat {
   
 }
 
-kenya <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/gadm36_KEN_0.shp')
+kenya <- read_sf(paste0(db_folder, '/input_folder/gadm36_KEN_0.shp'))
 
 kenya <- st_cast(kenya, "POLYGON") %>% st_union()
 
@@ -132,7 +137,7 @@ functpop<-parLapply(cluster,1:nrow(new_facilities),function(i){
 stopCluster(cluster)
 
 
-pop = raster('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/input_folder/Population.tif')
+pop = raster(paste0(db_folder, '/input_folder/Population.tif'))
 
 for (i in 1:length(functpop)){
   if (class(functpop[[i]]$p)[1]=="sfc_MULTIPOLYGON"){
@@ -169,4 +174,4 @@ pol$popsum = pp
 
 pol$id = paste0("cl", 1:nrow(pol))
 
-write_sf(pol, "D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/onsset/kenya_clusters/clusters_tt_based.gpkg")
+write_sf(pol, paste0(home_repo_folder, '/kenya_clusters/clusters_tt_based.gpkg"))

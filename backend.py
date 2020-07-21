@@ -7,12 +7,13 @@ import sys
 import os
 
 ## Modify environment variables to find QGIS and qt plugins during qgis.core import
-sys.path.append(r'C:/OSGeo4W64/apps/qgis/python/plugins/processing')
-sys.path.append(r'C:/OSGeo4W64/apps/qgis/python')
-sys.path.append(r'C:/OSGeo4W64/apps/qgis')
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = r'C:/OSGeo4W64/apps/Qt5/plugins'
-os.environ['PATH'] += r';C:/OSGeo4W64/apps/qgis/bin;C:/OSGeo4W64/apps/Qt5/bin'
-sys.path.extend([r'C:/OSGeo4W64/apps/qgis/python',r'C:/OSGeo4W64/apps/Python37/Lib/site-packages'])
+
+sys.path.append(osgeo_path + '/apps/qgis/python/plugins/processing')
+sys.path.append(osgeo_path + '/apps/qgis/python')
+sys.path.append(osgeo_path + '/apps/qgis')
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = osgeo_path + '/apps/Qt5/plugins'
+os.environ['PATH'] += ';C:/OSGeo4W64/apps/qgis/bin;C:/OSGeo4W64/apps/Qt5/bin'
+sys.path.extend([osgeo_path + '/apps/qgis/python',osgeo_path + '/apps/Python37/Lib/site-packages'])
 
 #import osgeo.gdal
 #
@@ -61,7 +62,7 @@ import subprocess
 #
 #qgs = QgsApplication([], False)
 #qgs.initQgis()
-#QgsApplication.setPrefixPath(r'C:/OSGeo4W64/apps/qgis', True)
+#QgsApplication.setPrefixPath(osgeo_path + '/apps/qgis', True)
 #import processing
 #from processing.core.Processing import Processing
 #Processing.initialize()
