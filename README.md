@@ -14,7 +14,7 @@ The platform has been developed and tested in a Windows 10 environment.
 
 [Setting up the environment]:
 - NB: this step is only necessary when setting up the environment for the first time. 
-- The M-LED platform requires PyQGIS (Python + QGIS algorithm toolbox) and R. A handy automatic wizard batch file ("installdependencies.bat") is included in the root of the M-LED repository. The file ensures that the software requirements are met on the local machine, and if they are not, it prompts the user to automatically download and install the required software and libraries. 
+- The M-LED platform requires PyQGIS (Python + QGIS algorithm toolbox) and R. A handy automatic wizard batch file ("installdependencies.cmd") is included in the root of the M-LED repository. The file ensures that the software requirements are met on the local machine, and if they are not, it prompts the user to automatically download and install the required software and libraries. 
 - The batch will prompt the user for the path where you unzipped the MLED_database.
 
 ####
