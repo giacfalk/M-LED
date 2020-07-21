@@ -4,6 +4,8 @@
 
 ![alt text](https://github.com/giacfalk/M-LED/blob/master/logo.png?raw=true)
 
+Developed by Giacomo Falchetta, Nicolò Stevanato, Paolo Cornali and Davide Mazzoni with inputs from Magda Moner-Girona, Manfred Hafner and Emanuela Colombo
+
 ####
 The platform has been developed and tested in a Windows 10 environment. 
 
