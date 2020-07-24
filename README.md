@@ -18,6 +18,15 @@ The platform has been developed and tested in a Windows 10 environment.
 
 **NB: These steps are only necessary when setting up the environment for the first time. NB2: The `.\installdependencies.cmd` file MUST be run with administrator priviledges (right click -> run as administrator)**
 
+## Operating the platform
+1. Open QGIS and start the Python Console from the top menu (Plugins -> Python Console).
+
+2. Navigate to the path where the cloned repository is located and open the `.\wrapper.py` file.
+
+3. Click 'Run'
+
+4. Wait (depending on your machine's processing speed this might take up to some hours)
+
 ## Customising the analysis
 -> See the repo's Wiki (https://github.com/giacfalk/M-LED/wiki)
 
