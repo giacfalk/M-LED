@@ -1,4 +1,4 @@
-# PrElGen v0.2
+# MLED v0.2
 # Giacomo Falchetta, Paolo Cornali, Davide Mazzoni, Nicolò Stevanato
 # Version: 24/10/2019
 
@@ -16,7 +16,7 @@
 
 gadm0 = QgsVectorLayer(input_folder + 'gadm36_' + countryiso3 + '_0.shp',"","ogr")
 
-# Define clusters generated in PrElGen
+# Define clusters generated in MLED
 
 ##############fix filenames ######################
 

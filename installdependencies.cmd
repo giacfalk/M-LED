@@ -1,7 +1,7 @@
 set mypath=%~dp0
 @echo %mypath%>%userprofile%\Desktop\repo_folder_path.txt
 
-set /p q1="Paste the full path to the unzipped M-LED PrElGen_database folder -> "
+set /p q1="Paste the full path to the unzipped M-LED MLED_database folder -> "
 @echo %q1%>%userprofile%\Desktop\db_folder_path.txt
 
 set /p q1="Do you have R installed on your local machine? [y/n]: "

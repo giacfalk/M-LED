@@ -74,7 +74,7 @@ image/kwh_yearly_cell_IMAGE.csv
 image/pop_IMAGE.csv
 image/pop_noaccess_IMAGE.csv
 image/schooledupredict.py
-image/PrElGen_image.py
+image/MLED_image.py
 image/split schools and healthcare by tier.R
 jrc/gadm36_1.dbf
 jrc/gadm36_1.prj
@@ -116,3 +116,4 @@ results_figures/provinces.png
 archive/image/water_demand/mirrig.nc
 archive/image/water_demand/GLANDCOVERDETAIL_30MIN.nc
 archive/image/water_demand/GFRAC_30MIN.nc
+residual_productive-DESKTOP-6BKTP84.r

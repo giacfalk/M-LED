@@ -1,4 +1,4 @@
-# PrElGen (Productive uses Electricity demand Generator) v0.1 - Electricity Demand Generation
+# MLED (Productive uses Electricity demand Generator) v0.1 - Electricity Demand Generation
 # Base version 
 # Version: 22/04/2020
 
@@ -14,7 +14,7 @@ os.chdir('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Ag
 #from backend import *
 
 # Select the scenario to be operated
-#scenario = input('What is the name of the scenario (matching a .py file in your PrElGen folder) you want to implement?')
+#scenario = input('What is the name of the scenario (matching a .py file in your MLED folder) you want to implement?')
 #import importlib
 #importlib.import_module(scenario)
 
@@ -665,7 +665,7 @@ processing.run("qgis:zonalstatistics",
 
 ####
 # Calculate the number of people in each tier in each cluster
-#clusters = QgsVectorLayer('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database_SSA/statcompiler_subnational_data_2020-03-17/shps/sdr_subnational_data_dhs_2015.shp',"","ogr") 
+#clusters = QgsVectorLayer('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/MLED_database_SSA/statcompiler_subnational_data_2020-03-17/shps/sdr_subnational_data_dhs_2015.shp',"","ogr") 
 #
 #raster_tiers = QgsRasterLayer('D:/merged_tiers.tif')
 #
@@ -731,7 +731,7 @@ processing.run("qgis:zonalstatistics",
                 'COLUMN_PREFIX': 'acc_pop_t4', 'STATS': [1]})
 
 # Spatial join between income quintiles DHS and clusters
-dhs = QgsVectorLayer('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database_SSA/statcompiler_subnational_data_2020-03-17/shps/sdr_subnational_data_dhs_2015.shp',"","ogr") 
+dhs = QgsVectorLayer('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/MLED_database_SSA/statcompiler_subnational_data_2020-03-17/shps/sdr_subnational_data_dhs_2015.shp',"","ogr") 
 
 processing.run("qgis:joinattributesbylocation", {'INPUT':clusters ,'JOIN':dhs,'PREDICATE':[0,1],'JOIN_FIELDS':['HCWIXQPLOW', 'HCWIXQP2ND', 'HCWIXQPMID', 'HCWIXQP4TH', 'HCWIXQPHGH', 'ISO'],'METHOD':1,'DISCARD_NONMATCHING':False,'PREFIX':'','OUTPUT':processed_folder + 'clusters_14.gpkg'})
 
@@ -1041,7 +1041,7 @@ processing.run("native:joinattributestable", {
 
 clusters = QgsVectorLayer(home_repo_folder + 'clusters_final.gpkg',"","ogr")
 
-QgsVectorFileWriter.writeAsVectorFormat(clusters, processed_folder +'PrElGen_final.csv', 'CP1250', clusters.crs(), 'CSV')
+QgsVectorFileWriter.writeAsVectorFormat(clusters, processed_folder +'MLED_final.csv', 'CP1250', clusters.crs(), 'CSV')
 
 
 import glob

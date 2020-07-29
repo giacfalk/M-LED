@@ -1,4 +1,4 @@
-# PrElGen (Productive uses Electricity demand Generator) v0.1 - Electricity Demand Generation
+# MLED (Productive uses Electricity demand Generator) v0.1 - Electricity Demand Generation
 # Hourly resolution
 # Version: 20/05/2020
 
@@ -14,7 +14,7 @@ os.chdir(home_repo_folder)
 #from backend import *
 
 # Select the scenario to be operated
-#scenario = input('What is the name of the scenario (matching a .py file in your PrElGen folder) you want to implement?')
+#scenario = input('What is the name of the scenario (matching a .py file in your MLED folder) you want to implement?')
 #import importlib
 #importlib.import_module(scenario)
 
@@ -971,7 +971,7 @@ clusters = clusters.fillna(0)
 clusters.to_csv(processed_folder + 'clusters_8.csv')
 
 #%%
-# 7) Add education and healthcare facilities
+ Add education and healthcare facilities
 print(f"Estimating electricity requirements form schools and healthcare facilities. Elapsed time:",  round((time.time()-then)/60, 2), " minutes")
 
 #OSM_question = input(Do you want to use a local shapefile or retireve facilities using OpenStreetMap?)

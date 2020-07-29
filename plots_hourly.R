@@ -5,13 +5,12 @@ library(ggplot2)
 library(scales)
 library(tidyr)
 library(tidyverse)
-library(sf)
 
 desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
 home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
 db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
 
-setwd(paste0(home_repo_folder, 'results_figures'))
+setwd(paste0(home_repo_folder, '/results_figures'))
 
 geogeo <- sf$geometry
 
@@ -374,6 +373,7 @@ provinces$Crop_processing<- exactextractr::exact_extract(sf_croppro, provinces, 
 provinces$Comm_prod<- exactextractr::exact_extract(sf_residual_productive_tt, provinces, fun="sum")
 
 provinces <- gather(provinces, key = "sector", value = "value", 6:11)
+provinces$kenya <- ifelse(provinces$CAPTION==" Kenya", 0, 1)
 
 barplot_prov <- ggplot(provinces, aes(x=CAPTION, y=value/100000000))+
   theme_classic()+
@@ -381,9 +381,15 @@ barplot_prov <- ggplot(provinces, aes(x=CAPTION, y=value/100000000))+
   scale_y_continuous(name="Yearly latent electricity demand (TWh)")+
   xlab("Province")+
   scale_fill_discrete(name="Sector")+
-  theme(legend.position = "bottom", legend.direction = "horizontal")
+  theme(legend.position = "bottom", legend.direction = "horizontal", strip.background = element_blank(), strip.text = element_blank())+
+  facet_wrap(vars(provinces$kenya), scales = "free", space="free")
 
-ggsave("provinces.png", barplot_prov, device = "png")
+library(grid)
+gt = ggplot_gtable(ggplot_build(barplot_prov))
+gt$widths[5] = 0.3*gt$widths[5]
+grid.draw(gt)
+
+ggsave("provinces.png", gt, scale = 1.3)
 
 provinces_without = provinces
 provinces_without$geometry=NULL

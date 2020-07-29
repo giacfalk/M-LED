@@ -38,41 +38,7 @@ eff_impr_urb5= 0.15
 nhours_irr = 6
 eta_pump = 0.75
 
-## Demand per tier per household type (kWh/year)
-#rur1 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_1.csv')).iloc[:,1].sum(axis=0)/60000/100
-#rur2 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_2.csv')).iloc[:,1].sum(axis=0)/60000/100
-#rur3 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_3.csv')).iloc[:,1].sum(axis=0)/60000/100
-#rur4 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_4.csv')).iloc[:,1].sum(axis=0)/60000/100
-#rur5 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_5.csv')).iloc[:,1].sum(axis=0)/60000/100
-#
-#urb1 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_6.csv')).iloc[:,1].sum(axis=0)/60000/100
-#urb2 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_7.csv')).iloc[:,1].sum(axis=0)/60000/100
-#urb3 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_8.csv')).iloc[:,1].sum(axis=0)/60000/100
-#urb4 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_9.csv')).iloc[:,1].sum(axis=0)/60000/100
-#urb5 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_households/results/output_file_10.csv')).iloc[:,1].sum(axis=0)/60000/100
-#
-## define consumption of facility types (kWh/facility/year)
-#health1 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_1.csv')).iloc[:,1].sum(axis=0)/60000
-#health2 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_2.csv')).iloc[:,1].sum(axis=0)/60000
-#health3 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_3.csv')).iloc[:,1].sum(axis=0)/60000
-#health4 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_4.csv')).iloc[:,1].sum(axis=0)/60000
-#health5 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_5.csv')).iloc[:,1].sum(axis=0)/60000
-#
-## edu1 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_social/results/output_file_6.csv')).iloc[:,1].sum(axis=0)/60000
-## edu2 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_social/results/output_file_7.csv')).iloc[:,1].sum(axis=0)/60000
-## edu3 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_social/results/output_file_8.csv')).iloc[:,1].sum(axis=0)/60000
-## edu4 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_social/results/output_file_9.csv')).iloc[:,1].sum(axis=0)/60000
-## edu5 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_social/results/output_file_10.csv')).iloc[:,1].sum(axis=0)/60000
-#
-#edu1 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_4.csv')).iloc[:,1].sum(axis=0)/60000
-#edu2 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_4.csv')).iloc[:,1].sum(axis=0)/60000
-#edu3 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_4.csv')).iloc[:,1].sum(axis=0)/60000
-#edu4 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_4.csv')).iloc[:,1].sum(axis=0)/60000
-#edu5 = (pandas.read_csv(home_repo_folder + 'ramp/RAMP_services/OLD - NS Before Field Campaign/output_file_4.csv')).iloc[:,1].sum(axis=0)/60000
-#
-
-# General economic parameters
-discount_rate = 0.15 # REF:
+discount_rate = 0.15 # 
 
 # Transportation costs
 fuel_consumption = 15 # (l/h) # REF: OnSSET
@@ -112,6 +78,3 @@ hc_2_app_cost = 4710
 hc_3_app_cost = 95060
 hc_4_app_cost = 305660
 hc_5_app_cost = 611450
-
-# Water demand scenario
-water_demand_LPJmL_scenario = QgsRasterLayer(home_repo_folder + 'image/water_demand/mirrig.nc')

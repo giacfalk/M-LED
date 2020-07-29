@@ -4,7 +4,7 @@ library(raster)
 library(ggplot2)
 library(scales)
 
-sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_econ_results.gpkg')
+sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/MLED_database/processed_folder/clusters_econ_results.gpkg')
 
 setwd('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/results_figures')
 
@@ -258,7 +258,7 @@ library(cowplot)
 library(raster)
 library(ggplot2)
 library(scales)
-sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/PrElGen_database/processed_folder/clusters_econ_results.gpkg')
+sf <- read_sf('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/MLED_database/processed_folder/clusters_econ_results.gpkg')
 
 setwd('D:/OneDrive - FONDAZIONE ENI ENRICO MATTEI/Current papers/Prod_Uses_Agriculture/Repo/results_figures')
 

@@ -8,10 +8,9 @@ desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
 home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
 db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
 
-
 sf <- read_sf(paste0(db_folder, '/processed_folder/clusters_16.gpkg'))
 
-a <- read.csv(paste0(db_folder, '/processed_folder/clusters_8.csv") %>% dplyr::select(starts_with("kwh_cropproc_tt"), id))
+a <- read.csv(paste0(db_folder, '/processed_folder/clusters_8.csv')) %>% dplyr::select(starts_with("kwh_cropproc_tt"), id)
 
 b<- read.csv(paste0(db_folder, '/processed_folder/clusters_16.csv'))
 
@@ -80,15 +79,15 @@ colnames(hist) <- c("Highest wealth share", "Employment rate", "Population densi
 
 hist <- tidyr::gather(hist, key="var", value="value", 1:5)
 
-a <- ggplot(hist)+
-  geom_histogram(aes(x=value, fill=var), colour="black", lwd=0.01, binwidth = 0.1)+
-  facet_wrap(vars(var))+
-  xlab("Normalised values")+
-  ylab("Count")+
-  theme(legend.position = "none")
-
-ggsave("pca.png", a, device = "png")
-
+# a <- ggplot(hist)+
+#   geom_histogram(aes(x=value, fill=var), colour="black", lwd=0.01, binwidth = 0.1)+
+#   facet_wrap(vars(var))+
+#   xlab("Normalised values")+
+#   ylab("Count")+
+#   theme(legend.position = "none")
+# 
+# ggsave("pca.png", a, device = "png")
+# 
                   
 sf_prod <- cbind(sf, PCs$PCav)
 

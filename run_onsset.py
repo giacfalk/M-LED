@@ -1,4 +1,4 @@
-# PrElGen v0.1
+# MLED v0.1
 # Giacomo Falchetta, Paolo Cornali, Davide Mazzoni, Nicolò Stevanato
 # Version: 29/08/2019
 

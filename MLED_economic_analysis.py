@@ -1,10 +1,10 @@
-# PrElGen (Productive uses Electricity demand Generator) - Economic Analysis
+# MLED (Productive uses Electricity demand Generator) - Economic Analysis
 # Version: 24/04/2020
 # This script can only be run after the electrification analysis has been carried out
 
 clusters = QgsVectorLayer(home_repo_folder + 'clusters_final.gpkg',"","ogr")
 
-# Merge PrElGen output with the key results of the electrification analysis
+# Merge MLED output with the key results of the electrification analysis
 results_csv = home_repo_folder + 'onsset/results/ke-1-0_1_0_0_1_0.csv'
 columns = pandas.read_csv(results_csv).columns.values
 
