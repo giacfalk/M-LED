@@ -20,7 +20,7 @@ User_list.append(LI)
 
 #Low-Income
 LI_light_bulb = LI.Appliance(LI,2,20,2,120,0.2,10)
-LI_light_bulb.windows([18*60,24*60],[0,30],0.35)
+LI_light_bulb.windows([18*60,24*60],[0,0],0.35)
 
 LI_Phone_charger = LI.Appliance(LI,2,7,2,240,0.2,10)
 LI_Phone_charger.windows([0,24*60],[0,0],0)

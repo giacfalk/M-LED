@@ -21,7 +21,7 @@ User_list.append(LMI)
 
 #Lower-Middle Income
 LMI_light_bulb = LMI.Appliance(LMI,3,20,3,120,0.2,10)
-LMI_light_bulb.windows([18*60,24*60],[0,30],0.35,[6*60,8*60])
+LMI_light_bulb.windows([18*60,24*60],[0,0],0.35,[6*60,8*60])
 
 LMI_Radio = LMI.Appliance(LMI,1,10,2,60,0.1,5)
 LMI_Radio.windows([6*60+30,9*60],[18*60,21*60],0.35)
