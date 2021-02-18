@@ -117,3 +117,5 @@ archive/image/water_demand/mirrig.nc
 archive/image/water_demand/GLANDCOVERDETAIL_30MIN.nc
 archive/image/water_demand/GFRAC_30MIN.nc
 residual_productive-DESKTOP-6BKTP84.r
+.Rproj.user
+archive/clustering/clusters_60min_1km.dbf
