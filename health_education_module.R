@@ -1,6 +1,3 @@
-#OSM_question = input(Do you want to use a local shapefile or retireve facilities using OpenStreetMap?)
-#https://towardsdatascience.com/loading-data-from-openstreetmap-with-python-and-the-overpass-api-513882a27fd0
-
 for (f in c("pupils_1","pupils_2","pupils_3","pupils_4","pupils_5")){
   
   r <- fasterize::fasterize(primaryschools %>% st_transform(3395) %>% st_buffer(500) %>% st_transform(4326), ID_raster, field = f)
@@ -14,8 +11,7 @@ for (f in c("beds_1", "beds_2","beds_3","beds_4","beds_5")){
 }
 
 
-#%%
-# 8) Estimate the yearly electric demand from healthcare and education facilities
+# Estimate the yearly electric demand from healthcare and education facilities
 # define consumption of facility types (kWh/facility/year)
 for (i in 1:12){
   assign(paste0('health1' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_services/1.Health/Dispensary/Outputs/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 

@@ -56,7 +56,7 @@ LCOE_for_pumping = 0.08 # USD/kWh # REF:
 lifetimepump = 30
 
 # import local crop prices csv.  Structure: X, Y, City, cropname1, cropname 2, ...
-prices = readxl::read_xlsx(paste0(input_folder , "prices.xls"))
+prices = readxl::read_xls(paste0(input_folder , "prices.xls"))
 
 # Appliances cost, household (check ./ramp/ramp/RAMP_households/Appliances cost.xlsx for inputs)
 rur1_app_cost=154
@@ -234,30 +234,3 @@ load_curve_irr = load_curve_irrig
 
 # import load curve of productive activities
 load_curve_prod_act <- read.csv(paste0(input_folder, 'productive profile.csv'))
-
-#####################
-# Population and electrification calculation
-#####################
-
-popnoaccess2018 = raster(paste0(processed_folder , 'noaccess/pop18_noaccess_kenya.tif'))
-population = raster(paste0(processed_folder , 'noaccess/pop18_kenya.tif'))
-
-clusters$pop <- exactextractr::exact_extract(population, clusters, fun="sum")
-clusters$noacc <- exactextractr::exact_extract(popnoaccess2018, clusters, fun="sum")
-
-# adjust
-somma = sum(clusters$pop)
-spread = ((national_official_population-somma)/somma)
-
-print(spread)
-
-clusters$pop <- clusters$pop * 1+spread
-
-somma = sum(clusters$noacc)
-spread = (((national_official_population*(1-national_official_elrate))-somma)/somma)
-
-print(spread)
-
-clusters$noacc <- clusters$noacc * 1+spread
-
-clusters$elrate <- 1- (clusters$noacc/clusters$pop)

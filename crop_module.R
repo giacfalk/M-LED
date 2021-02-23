@@ -1,5 +1,4 @@
-#%%
-# 2) Cropland
+# Cropland and irrigation water requirements
 
 # cont_1 <- function(X, na.rm = na.rm){
 #   ifelse((1 %in% X), 1, NA)
@@ -10,16 +9,20 @@
 # cropland_extent <- projectRaster(cropland_extent, crs="+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs")
 # clusters <- st_transform(clusters, 3395)
 
-clusters$cr_ha_count <- exactextractr::exact_extract(cropland_extent, clusters, fun="count")
 
+# Cropland in each cluster in hectares
+clusters$cr_ha_count <- exactextractr::exact_extract(cropland_extent, clusters, fun="count")
 clusters$cr_ha_count <- clusters$cr_ha_count * 900 * 0.0001
 
+# Area of each cluster
 clusters$area <- as.vector(st_area(clusters)) * 0.0001
 
+# Share of cropland over total cluster area
 clusters$crshare <- clusters$cr_ha_count / clusters$area
 
 #clusters <- st_transform(clusters, 4326)
 
+# downscale SPAM rasters
 ID_raster <- raster()
 nrow(ID_raster) <- 2160
 ncol(ID_raster) <- 4320
@@ -44,8 +47,7 @@ for (X in files){
   clusters <- clusters %>%  mutate(!!a := (!!as.name(a)) * crshare_sp) 
 }
 
-#%%
-# 3) Irrigation water requirements
+# Irrigation water requirements
 
 clusters$clima_zone <- exactextractr::exact_extract(climatezones, clusters, fun="majority")
 
@@ -141,7 +143,7 @@ aa$geom=NULL
 clusters[paste0('monthly_IRREQ_' , as.character(crops[i,1]) , "_" , as.character(z))] = ifelse(aa[paste0('monthly_IRREQ_' , as.character(crops[i,1]) , "_" , as.character(z))]<0, 0, pull(aa[paste0('monthly_IRREQ_' , as.character(crops[i,1]) , "_" , as.character(z))]))
 }}
   
-  # Obtain total yearly WG per cluster (in m3)
+# Obtain total yearly WG per cluster (in m3)
 
 aa <- clusters
 aa$geometry=NULL

@@ -1,7 +1,3 @@
-desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
-home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
-db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
-
 costs<-read.csv(paste0(db_folder, '/input_folder/electric_pumps_costs.csv'))
 
 costs$Depth...m.well.=as.numeric(costs$Depth...m.well.)

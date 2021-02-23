@@ -136,12 +136,14 @@ save.image(file="bk1_1.Rdata")
 
 # bind...
 clusters2$geom<- NULL
+clusters2$geometry<- NULL
 clusters2 <- clusters2[!duplicated(clusters2[,c('id')]),]
 clusters2 <- dplyr::select(clusters2, -id) 
 clusters2 <- bind_cols(clusters, clusters2)
 
 # run PCA
 clusters2$geometry<-NULL
+clusters2$geom<-NULL
 
 clusters2$popdens=clusters2$pop/clusters2$area
 clusters2$employment = (clusters2$EMEMPLMEMC + clusters2$EMEMPLWEMC)/2
@@ -197,6 +199,7 @@ clusters_prod <- cbind(clusters, PCs$PCav)
 
 clusters_residential = dplyr::select(clusters_prod, id, starts_with("PerHHD_")) %>% as.data.frame()
 clusters_residential$geometry= NULL
+clusters_residential$geom= NULL
 clusters_residential$PerHHD_tt = NULL
 
 clusters_residential$PerHHD_tt_monthly_1 = as.numeric(clusters_residential$PerHHD_tt_monthly_1) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
@@ -251,7 +254,7 @@ for (h in c(1:24)){
 
 for (m in c(1:12)){
 
-  a<-dplyr::select(clusters_prod, starts_with("PerHHD_tt_monthly"))[,m] %>% as.data.frame() %>% mutate(geometry=NULL) %>% mutate_all(., .funs = as.numeric) *  clusters_prod$PCs.PCav
+  a<-dplyr::select(clusters_prod, starts_with("PerHHD_tt_monthly"))[,m] %>% as.data.frame() %>% mutate(geometry=NULL, geom=NULL) %>% mutate_all(., .funs = as.numeric) *  clusters_prod$PCs.PCav
 
 clusters_prod <- mutate(clusters_prod, !!paste0("residual_productive_tt_", m) := a[,1])
 }
@@ -259,7 +262,7 @@ clusters_prod <- mutate(clusters_prod, !!paste0("residual_productive_tt_", m) :=
 clusters <- clusters_prod
 
 gdata::keep(clusters, gadm0, home_repo_folder, input_folder, processed_folder, spam_folder, sure = T)
-
+source("manual_parameters.R", echo = F)
 
 ###
 

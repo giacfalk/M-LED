@@ -1,11 +1,11 @@
-# geom / geometry = NULL in tutti gli script
-# keep at the end of some script to hasten running -> use remove instead of keep
-# recover comments from py and comment all code
+# finish translate economic module to R
+# installdependencies -> fix 
+# wiki -> update
+# check order of magnitude of results
 
-# MLED (Productive uses Electricity demand Generator) v0.1 - Electricity Demand Generation
+# MLED - Multisectoral Latent Electricity Demand assessment platform
 # Hourly resolution
-# R translation
-# Version: 09/02/2021
+# Version: 23/02/2021
 
 ####
 # Define the working directory
@@ -18,10 +18,21 @@ source("backend.R", echo = F)
 # Import the manual_parameters, to be set before running this script
 timestamp()
 source("manual_parameters.R", echo = F)
-    
+
 # Select the scenario to be operated
 timestamp()
 source("scenario_baseline.R", echo = T)
+save.image(file="bk1.Rdata")
+
+# Estimate electrification
+timestamp()
+source("electrification_estimation.R", echo = T)
+save.image(file="bk1.Rdata")
+
+# Run clustering
+timestamp()
+source("traveltime_based_clustering.R", echo = T)
+source("contiguity_based_clustering.R", echo = T)
 save.image(file="bk1.Rdata")
 
 # Cropland and irrigation demand
@@ -66,3 +77,23 @@ fields <- c("")
 for (k in fields){
 writeRaster(fasterize::fasterize(clusters, r, field=k, fun="first"), paste0(k, ".tif"))
 }
+
+#################
+# Economic analysis
+
+# Run it
+timestamp()
+source("MLED_economic_analysis.R", echo = T)
+save.image(file="bk1.Rdata")
+
+# Costs of groundwater pumps
+timestamp()
+source("groundwater_pumps_costs.R", echo = T)
+save.image(file="bk1.Rdata")
+
+
+# Plot it
+timestamp()
+source("economic_analysis_plots.R", echo = T)
+
+

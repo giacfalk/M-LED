@@ -115,7 +115,8 @@ clusters$ISO = as.factor("KE")
 # 
 # clusters_ng <- clusters
 # clusters_ng$geometry=NULL
-# 
+# clusters_ng$geom=NULL
+
 # prediction <- predict.rfsrc(pr, clusters_ng)
 # clusters$acc_pop_share_t1_new = prediction$regrOutput$acc_pop_share_t1$predicted
 # clusters$acc_pop_share_t2_new = prediction$regrOutput$acc_pop_share_t2$predicted

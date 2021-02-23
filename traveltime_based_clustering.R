@@ -1,48 +1,14 @@
-library(readxl)
-library(reshape2)
-library(exactextractr)
-library(dplyr)
-library(raster)
-library(sf)
-library(foreign)
-library(splitstackshape)
-library(ggplot2)
-library(ggpmisc)
-library(gglorenz)
-library(cowplot)
-library(acid)
-library(rnaturalearth)
-library(rnaturalearthdata)
-library(spatstat)
-library(doBy)
-library(parallel)
-library(rgdal)
-library(data.table)
-require(gdistance)
-library(spatialEco)
-require(gdistance)
-library(rgdal)
-library(rgeos)
-library(nngeo)
+population <- aggregate(population, fact=30, fun=sum, na.rm=TRUE)
+population[population<=0] = NA
 
-desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
-home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
-db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
+totalpopulationconstant = cellStats(population, 'sum', na.rm = TRUE)
 
-
-pop = raster(paste0(db_folder, '/input_folder/Population.tif'))
-pop <- aggregate(pop, fact=30, fun=sum, na.rm=TRUE)
-pop[pop<=0] = NA
-
-totalpopconstant = cellStats(pop, 'sum', na.rm = TRUE)
-
-setwd(paste0(db_folder, '/input_folder))
 T.filename <- 'study.area.T_kenya.rds'
 T.GC.filename <- 'study.area.T.GC_kenya.rds'
-friction <- raster("friction_cut_1209.tif")
-friction <- projectRaster(friction, pop)
+friction <- raster(paste0(input_folder, "friction_cut_1209.tif"))
+friction <- projectRaster(friction, population)
 
-friction <- overlay(friction, pop, fun = function(x, y) {
+friction <- overlay(friction, population, fun = function(x, y) {
   x[is.na(y)] <- NA
   return(x)
 })
@@ -58,8 +24,8 @@ saveRDS(T.GC, "study.area.T.GC_kenya.rds")
 
 
 repeat {
-  all = which.max(pop)
-  pos = as.data.frame(xyFromCell(pop, all))
+  all = which.max(population)
+  pos = as.data.frame(xyFromCell(population, all))
   
   new_facilities <- if(exists("new_facilities")){
     rbind(new_facilities, st_as_sf(pos, coords = c("x", "y"), crs = 4326))
@@ -82,22 +48,22 @@ repeat {
   xy.matrix <- as.matrix(xy.data.frame)
   
   # Run the accumulated cost algorithm to make the final output map. This can be quite slow (potentially hours).
-  t34_new <- accCost(T.GC, xy.matrix)
-  t34_new = crop(t34_new, extent(pop))
+  acc <- accCost(T.GC, xy.matrix)
+  acc = crop(acc, extent(population))
   
-  pop <- overlay(pop, t34_new, fun = function(x, y) {
+  population <- overlay(population, acc, fun = function(x, y) {
     x[y<=60] <- NA
     return(x)
   })
   
-  k_34 = cellStats(pop, 'sum', na.rm = TRUE)/totalpopconstant
-  print(paste0("Fraction of population more than 60 minutes away from healthcare: ", k_34))
+  k_acc = cellStats(population, 'sum', na.rm = TRUE)/totalpopulationconstant
+  print(paste0("Fraction of populationulation more than 60 minutes away from healthcare: ", k_acc))
   # exit if the condition is met
-  if (k_34==0) break
+  if (k_acc==0) break
   
 }
 
-kenya <- read_sf(paste0(db_folder, '/input_folder/gadm36_KEN_0.shp'))
+kenya <- gadm0
 
 kenya <- st_cast(kenya, "POLYGON") %>% st_union()
 
@@ -114,17 +80,17 @@ new_facilities$id = 1:nrow(new_facilities)
 
 cluster <- makePSOCKcluster(detectCores()-1)
 
-clusterExport(cl=cluster, c("new_facilities", "T.GC","pop",
+clusterExport(cl=cluster, c("new_facilities", "T.GC","population",
                             "st_coordinates","accCost","aggregate",
                             "extent","overlay","cellStats","crop", "rasterToPolygons", "st_as_sf", "st_sf", "mutate", "st_union"))
 
-functpop<-parLapply(cluster,1:nrow(new_facilities),function(i){
+functpopulation<-parLapply(cluster,1:nrow(new_facilities),function(i){
   id_exp = new_facilities[i, ]$id
   xy.matrix <-st_coordinates(new_facilities[i, ])
-  servedpop <- accCost(T.GC, xy.matrix)
+  servedpopulation <- accCost(T.GC, xy.matrix)
   threshold = 60
-  servedpop[servedpop>threshold] <- NA
-  p <- rasterToPolygons(servedpop, n=16, na.rm=TRUE, digits=1, dissolve=TRUE)
+  servedpopulation[servedpopulation>threshold] <- NA
+  p <- rasterToPolygons(servedpopulation, n=16, na.rm=TRUE, digits=1, dissolve=TRUE)
   
   # assign id to polygon = i
   p = st_as_sf(p)
@@ -137,41 +103,41 @@ functpop<-parLapply(cluster,1:nrow(new_facilities),function(i){
 stopCluster(cluster)
 
 
-pop = raster(paste0(db_folder, '/input_folder/Population.tif'))
+population = raster(paste0(input_folder , 'Population.tif'))
 
-for (i in 1:length(functpop)){
-  if (class(functpop[[i]]$p)[1]=="sfc_MULTIPOLYGON"){
+for (i in 1:length(functpopulation)){
+  if (class(functpopulation[[i]]$p)[1]=="sfc_MULTIPOLYGON"){
     print(i)
-    functpop[[i]] <- st_cast(functpop[[i]], "POLYGON")
+    functpopulation[[i]] <- st_cast(functpopulation[[i]], "POLYGON")
   }
-  functpop[[i]]  <- functpop[[i]] [c("p", "id")]
+  functpopulation[[i]]  <- functpopulation[[i]] [c("p", "id")]
 }
 
-functpop2<-sf::st_as_sf(data.table::rbindlist(functpop))
+functpopulation2<-sf::st_as_sf(data.table::rbindlist(functpopulation))
 
 nf_temp = new_facilities
 nf_temp$geometry = NULL
 nf_temp = dplyr::select(nf_temp, id) %>% as.data.frame()
 
-pol = merge(nf_temp , functpop2, by="id") %>% st_as_sf(.)
+pol = merge(nf_temp , functpopulation2, by="id") %>% st_as_sf(.)
 
 cluster <- makePSOCKcluster(detectCores()-1)
 clusterExport(cl=cluster, c("pol", "st_sf", "filter",
-                            "exact_extract","st_intersection","st_intersects", "pop", "%>%", "st_geometry_type", "st_cast"))
+                            "exact_extract","st_intersection","st_intersects", "population", "%>%", "st_geometry_type", "st_cast"))
 
 #timestamp()
 pp = mclapply(1:nrow(pol),function(i){
   b<-st_intersects(pol[i,], pol[-i,])
   a<-sf::st_touches(pol[i,], pol[-i,])
-  ifelse(length(setdiff(b[1][[1]], a[1][[1]]))==0, exact_extract(pop, pol[i,], 'sum'), exact_extract(pop, pol[i,], 'sum')*ifelse(length(as.numeric(st_area(st_difference(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),])))))!=0, as.numeric(st_area(st_difference(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))/as.numeric(st_area(pol[i,])), 0) + exact_extract(pop, pol[i,], 'sum')*ifelse(length(as.numeric(st_area(st_intersection(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))!=0), as.numeric(st_area(st_intersection(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))/as.numeric(st_area(pol[i,]))/length(setdiff(b[1][[1]], a[1][[1]])),0))
+  ifelse(length(setdiff(b[1][[1]], a[1][[1]]))==0, exact_extract(population, pol[i,], 'sum'), exact_extract(population, pol[i,], 'sum')*ifelse(length(as.numeric(st_area(st_difference(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),])))))!=0, as.numeric(st_area(st_difference(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))/as.numeric(st_area(pol[i,])), 0) + exact_extract(population, pol[i,], 'sum')*ifelse(length(as.numeric(st_area(st_intersection(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))!=0), as.numeric(st_area(st_intersection(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))/as.numeric(st_area(pol[i,]))/length(setdiff(b[1][[1]], a[1][[1]])),0))
 })
 #timestamp()
 
 stopCluster(cluster)
 
 pp = do.call(rbind, pp)
-pol$popsum = pp
+pol$populationsum = pp
 
 pol$id = paste0("cl", 1:nrow(pol))
 
-write_sf(pol, paste0(home_repo_folder, '/kenya_clusters/clusters_tt_based.gpkg"))
+write_sf(pol, paste0(repo_folder, 'clusters_tt_based.gpkg'))

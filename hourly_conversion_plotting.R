@@ -1,5 +1,11 @@
 cl_bk <- clusters
 
+geogeo <- clusters$geometry
+
+if (is.null(geogeo)){
+    geogeo <- clusters$geom
+}
+
 clusters$geometry=NULL
 clusters$geom=NULL
 
@@ -315,6 +321,7 @@ provinces <- purrr::reduce(list(provinces, country), clusters:::rbind.clusters)
 template <- raster(paste0(db_folder, '/input_folder/template_1km.tif'))
 
 clusters$geometry=geogeo
+
 clusters = st_as_sf(clusters)
 
 clusters <- mutate(clusters, sf_residential_tt = (30 * (as.numeric(PerHHD_tt_monthly_1) + as.numeric(PerHHD_tt_monthly_2) + as.numeric(PerHHD_tt_monthly_3) + as.numeric(PerHHD_tt_monthly_4) + as.numeric(PerHHD_tt_monthly_5) + as.numeric(PerHHD_tt_monthly_6) + as.numeric(PerHHD_tt_monthly_7) + as.numeric(PerHHD_tt_monthly_8) + as.numeric(PerHHD_tt_monthly_9) + as.numeric(PerHHD_tt_monthly_10) + as.numeric(PerHHD_tt_monthly_11) + as.numeric(PerHHD_tt_monthly_12))/1000) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)) 
