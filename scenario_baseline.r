@@ -89,8 +89,7 @@ hc_5_app_cost = 611450
 # Input data
 #####################
 
-#
-clusters = read_sf(paste0(home_repo_folder , 'archive/clustering/clusters_60min_1km.shp'))
+
 
 #
 provinces <- read_sf(paste0(db_folder, '/input_folder/KEN_8_provinces.shp'))
