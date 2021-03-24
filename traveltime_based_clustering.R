@@ -140,4 +140,6 @@ pol$populationsum = pp
 
 pol$id = paste0("cl", 1:nrow(pol))
 
+clusters = pol
+
 write_sf(pol, paste0(repo_folder, 'clusters_tt_based.gpkg'))
