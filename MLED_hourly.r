@@ -24,15 +24,15 @@ timestamp()
 source("scenario_baseline.R", echo = T)
 save.image(file="bk1.Rdata")
 
-# Estimate electrification
-timestamp()
-source("electrification_estimation.R", echo = T)
-save.image(file="bk1.Rdata")
-
 # Run clustering
 timestamp()
 source("traveltime_based_clustering.R", echo = T)
 source("contiguity_based_clustering.R", echo = T)
+save.image(file="bk1.Rdata")
+
+# Estimate electrification
+timestamp()
+source("electrification_estimation.R", echo = T)
 save.image(file="bk1.Rdata")
 
 # Cropland and irrigation demand
