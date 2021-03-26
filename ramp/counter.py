@@ -37,3 +37,40 @@ for k in Urbans.keys():
     for h in Urbans[k].keys(): 
         R_sum += Urbans[k][h].values.sum()     
     Urban_years[k]=R_sum/1000    
+
+
+Dispensary = {}
+for i in range (1,13):
+    Dispensary[i]=pd.read_csv('RAMP_services/1.Health/Dispensary/Outputs/output_file_{}.csv'.format(i),usecols=['0'])/60
+R_sum = 0
+for h in Dispensary.keys():
+    R_sum += Dispensary[h].values.sum()
+Dispensary_year = R_sum/1000
+
+HealthCentre = {}
+for i in range (1,13):
+    HealthCentre[i]=pd.read_csv('RAMP_services/1.Health/HealthCentre/Outputs/output_file_{}.csv'.format(i),usecols=['0'])/60
+R_sum = 0
+for h in HealthCentre.keys():
+    R_sum += HealthCentre[h].values.sum()
+HealthCentre_year = R_sum/1000
+
+SubCountyH = {}
+for i in range (1,13):
+    SubCountyH[i]=pd.read_csv('RAMP_services/1.Health/SubCountyH/Outputs/output_file_{}.csv'.format(i),usecols=['0'])/60
+R_sum = 0
+for h in SubCountyH.keys():
+    R_sum += SubCountyH[h].values.sum()
+SubCountyH_year = R_sum/1000
+
+School = {}
+for i in range (1,13):
+    School[i]=pd.read_csv('RAMP_services/2.School/Output/output_file_{}.csv'.format(i),usecols=['0'])/60
+R_sum = 0
+for h in School.keys():
+    R_sum += School[h].values.sum()
+School_year = R_sum/1000
+
+
+
+
