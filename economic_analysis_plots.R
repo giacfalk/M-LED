@@ -1,4 +1,3 @@
-
 sf <- read_sf(paste0(processed_folder, 'clusters_econ_results.gpkg'))
 
 # Plot  
@@ -31,7 +30,6 @@ a<- ggplot(sf_agri)+
   scale_fill_brewer(name="Crop type", palette = "Set1")+ 
   theme(axis.text.x = element_text(angle = 90))
 
-  
 ggsave("maxyields.png", a, device = "png")
 
 # B Maximum theretical yield
@@ -57,10 +55,6 @@ names(r) <- c("Revenues", "Trans_costs", "Pumping_costs")
 
 ext <- as.vector(extent(r))
 
-library(maps)  
-library(mapdata)
-library(maptools)
-
 boundaries <- map('worldHires', fill=TRUE,
                   xlim=ext[1:2], ylim=ext[3:4],
                   plot=FALSE)
@@ -75,16 +69,12 @@ my.at <- c(0, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 500000, 1000000)
 my.brks=seq(0, 1000000, by=90909.09)
 myColorkey <- list(at=my.brks, labels=list(at=my.brks, labels=my.at), space="bottom")
 
-library(rasterVis)
 YlOrRdTheme <- rasterTheme(panel.background = list(col='white'))
 
 png("map_econ.png", width=1800, height=1200, res=150)
 print(levelplot(r, xlim=c(34, 42), ylim=c(-5, 5),
                 main="Yearly revenue and costs (USD/ha/year)", at=my.at, colorkey=myColorkey, xlab="Longitude", ylab="Latitude", par.settings = YlOrRdTheme) + layer(sp.polygons(bPols, lwd=0.1, col='black')))
 dev.off()
-
-
-library(rasterVis)
 
 my.at <- c(1, 250, 500, 1000, 2500, 5000)
 my.brks=seq(1, 5000, by=833.3333)
@@ -96,4 +86,3 @@ png("map_revenues.png", width=1800, height=1200, res=150)
 print(levelplot(dollarsperha, margin=F, xlim=c(34, 42), ylim=c(-5, 5),
                 main="Local revenues net of pumping transport to market costs (USD/ha/year)", at=my.at, colorkey=myColorkey, xlab="Longitude", ylab="Latitude", par.settings = rasterVis::YlOrRdTheme) + layer(sp.polygons(bPols, lwd=0.1, col='black')))
 dev.off()
-

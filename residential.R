@@ -44,7 +44,6 @@ clusters$isurban <- exact_extract(urbrur, clusters, fun="majority")
 # Calculate the number of people in each tier in each cluster
 raster_tiers <- crop(raster_tiers, ext)
 
-population <- population250
 population <- projectRaster(population, raster_tiers)
 
 r1 <- raster_tiers

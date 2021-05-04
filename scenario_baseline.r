@@ -90,7 +90,7 @@ hc_5_app_cost = 611450
 #####################
 
 #
-clusters = read_sf(paste0(home_repo_folder , 'archive/clustering/clusters_60min_1km.shp'))
+clusters = read_sf(paste0(home_repo_folder , 'clusters_final.gpkg'))
 
 #
 provinces <- read_sf(paste0(db_folder, '/input_folder/KEN_8_provinces.shp'))
@@ -103,9 +103,6 @@ gadm3 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_3.shp'))
 
 # Define extent of country analysed
 ext = extent(gadm0)
-
-# Population (Default dataset used: HRSL, 30m)
-population = raster(paste0(input_folder , 'Population.tif'))
 
 # Import cropland extent (Default dataset used: GFSAD30CE)
 cropland_extent = raster(paste0(input_folder , 'Croplands_GFSAD30AFCE.tif'))
@@ -136,11 +133,13 @@ ppt = stack(paste0(input_folder , "TerraClimate/TerraClimate_ppt_2015.tif"))
 soil = stack(paste0(input_folder , "TerraClimate/TerraClimate_soil_2015.nc"))
 
 #
-roads<-read_sf(paste0(home_repo_folder, '/onsset/input/Roads/RoadsKEN.shp'))
+roads<-read_sf(paste0(input_folder, '/onsset/input/Roads/RoadsKEN.shp'))
 
-empl_wealth<-read_sf(paste0(home_repo_folder, '/jrc/wealth_employment/shps/sdr_subnational_data_dhs_2014.shp'))
+empl_wealth<-read_sf(paste0(input_folder, '/jrc/wealth_employment/shps/sdr_subnational_data_dhs_2014.shp'))
 
 traveltime <- raster(paste0(input_folder, 'travel.tif'))
+
+traveltime_market = raster(paste0(processed_folder, 'wholesale/traveltime_market.tif'))
 
 #
 DepthToGroundwater = read.delim(paste0(input_folder , 'DepthToGroundwater/xyzASCII_dtwmap_v1.txt'), sep='\t')
@@ -151,10 +150,12 @@ GroundwaterProductivity = read.delim(paste0(input_folder , 'GroundwaterProductiv
 urbrur <- raster(paste0(input_folder , 'GHSL_settlement_type.tif'))
 
 #
-raster_tiers = raster('D:/Electrification_SSA_data/dataset/tiersofaccess_SSA_2018.nc')
+raster_tiers = raster(paste0(input_folder , 'tiersofaccess_SSA_2018.nc'))
 
 #
-population250 <- raster(paste0(input_folder, "GHS_POP_E2015_GLOBE_R2019A_4326_30ss_V1_0.tif"))
+population <- raster(paste0(input_folder, "GHS_POP_E2015_GLOBE_R2019A_4326_30ss_V1_0.tif"))
+
+population <- rgis::mask_raster_to_polygon(population, gadm0)
 
 #
 dhs = read_sf(paste0(db_folder , '_SSA/statcompiler_subnational_data_2020-03-17/shps/sdr_subnational_data_dhs_2015.shp'))

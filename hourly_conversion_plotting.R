@@ -265,7 +265,6 @@ residual_productive <-ggplot(sf_residual_productive, aes(x=as.numeric(hour), y=v
 
 #####
 
-### okay, just fix magnitude of commercial (somehow wrong multiplication)
 all_sectors <- cowplot::plot_grid(residential + theme(legend.position = "none"), edu + theme(legend.position = "none"), health + theme(legend.position = "none"), irrigation + theme(legend.position = "none"), crop_pro + theme(legend.position = "none"), residual_productive + theme(legend.position = "none"))
 
 
@@ -298,25 +297,24 @@ barplot <- ggplot(df, aes(x=sector, y=V1/1000000000))+
   scale_fill_discrete(name="Sector")+
   theme(legend.position = "bottom", legend.direction = "horizontal")
 
-
 ggsave("barplot_sectors.png", barplot, device = "png", scale=1, width = 7, height = 5)
 
 
 ############
 
-country <- st_union(provinces) %>% st_as_sf()
+country <- st_union(gadm1) %>% st_as_sf()
 
-provinces_demo <- provinces
-provinces_demo$geometry=NULL
-provinces_demo = provinces_demo[1,]
-country <- bind_cols(provinces_demo, country) %>% st_as_sf()
-country$CAPTION = " Kenya"
+gadm1_demo <- gadm1
+gadm1_demo$geometry=NULL
+gadm1_demo = gadm1_demo[1,]
+country <- bind_cols(gadm1_demo, country) %>% st_as_sf()
+country$CAPTION = countryname
 country$geometry = country$x
 country$x=NULL  
 country = st_as_sf(country)
 st_crs(country) <- 4326
-st_crs(provinces) <- 4326
-provinces <- purrr::reduce(list(provinces, country), clusters:::rbind.clusters)
+st_crs(gadm1) <- 4326
+gadm1 <- purrr::reduce(list(gadm1, country), clusters:::rbind.clusters)
 
 template <- raster(paste0(db_folder, '/input_folder/template_1km.tif'))
 
@@ -354,38 +352,38 @@ sf_edu_tt <- fasterize::fasterize(clusters, template, field ="sf_edu_tt", fun="s
 
 sf_residual_productive_tt <- fasterize::fasterize(clusters, template, field ="sf_residual_productive_tt", fun="sum")
 
-provinces$Residential <- exactextractr::exact_extract(sf_residential_tt, provinces, fun="sum")
-provinces$Education<- exactextractr::exact_extract(sf_edu_tt, provinces, fun="sum")
-provinces$Healthcare<- exactextractr::exact_extract(sf_health_tt, provinces, fun="sum")
-provinces$Irrigation<- exactextractr::exact_extract(sf_irrig, provinces, fun="sum")
-provinces$Crop_processing<- exactextractr::exact_extract(sf_croppro, provinces, fun="sum")
-provinces$Comm_prod<- exactextractr::exact_extract(sf_residual_productive_tt, provinces, fun="sum")
+gadm1$Residential <- exactextractr::exact_extract(sf_residential_tt, gadm1, fun="sum")
+gadm1$Education<- exactextractr::exact_extract(sf_edu_tt, gadm1, fun="sum")
+gadm1$Healthcare<- exactextractr::exact_extract(sf_health_tt, gadm1, fun="sum")
+gadm1$Irrigation<- exactextractr::exact_extract(sf_irrig, gadm1, fun="sum")
+gadm1$Crop_processing<- exactextractr::exact_extract(sf_croppro, gadm1, fun="sum")
+gadm1$Comm_prod<- exactextractr::exact_extract(sf_residual_productive_tt, gadm1, fun="sum")
 
-provinces <- gather(provinces, key = "sector", value = "value", 6:11)
-provinces$kenya <- ifelse(provinces$CAPTION==" Kenya", 0, 1)
+gadm1 <- gather(gadm1, key = "sector", value = "value", 6:11)
+gadm1$kenya <- ifelse(gadm1$CAPTION==countryname, 0, 1)
 
-barplot_prov <- ggplot(provinces, aes(x=CAPTION, y=value/100000000))+
+barplot_prov <- ggplot(gadm1, aes(x=CAPTION, y=value/100000000))+
   theme_classic()+
   geom_bar(aes(fill=sector), position = "stack", stat = "identity", colour="black", lwd=0.01)+
   scale_y_continuous(name="Yearly latent electricity demand (TWh)")+
   xlab("Province")+
   scale_fill_discrete(name="Sector")+
   theme(legend.position = "bottom", legend.direction = "horizontal", strip.background = element_blank(), strip.text = element_blank())+
-  facet_wrap(vars(provinces$kenya), scales = "free", space="free")
+  facet_wrap(vars(gadm1$kenya), scales = "free", space="free")
 
 gt = ggplot_gtable(ggplot_build(barplot_prov))
 gt$widths[5] = 0.3*gt$widths[5]
 grid.draw(gt)
 
-ggsave("provinces.png", gt, scale = 1.3)
+ggsave("gadm1.png", gt, scale = 1.3)
 
-provinces_without = provinces
-provinces_without$geometry=NULL
+gadm1_without = gadm1
+gadm1_without$geometry=NULL
 
-View(provinces_without %>% group_by(CAPTION) %>% summarise(value=sum(value/100000000)))
-View(provinces_without %>% group_by(sector, CAPTION) %>% summarise(value=sum(value/100000000)))
+View(gadm1_without %>% group_by(CAPTION) %>% summarise(value=sum(value/100000000)))
+View(gadm1_without %>% group_by(sector, CAPTION) %>% summarise(value=sum(value/100000000)))
 
-map_regions <- ggplot(provinces, aes(fill=CAPTION))+
+map_regions <- ggplot(gadm1, aes(fill=CAPTION))+
   theme_classic()+
   geom_sf()+
   scale_fill_brewer(palette = "Set2", name="Regions")
@@ -393,7 +391,7 @@ map_regions <- ggplot(provinces, aes(fill=CAPTION))+
 ggsave("regions_map.png", map_regions, device = "png")
 
 # raster to polygons (clusters)
-grd <- clusters::st_make_grid(provinces, cellsize = 0.0083, square = T, what = "polygons", crs = 4326)
+grd <- clusters::st_make_grid(gadm1, cellsize = 0.0083, square = T, what = "polygons", crs = 4326)
 grd <- st_as_sf(grd)
 
 # extract sum, by sector

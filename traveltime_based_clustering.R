@@ -1,7 +1,4 @@
-population <- aggregate(population, fact=30, fun=sum, na.rm=TRUE)
-population[population<=0] = NA
-
-totalpopulationconstant = cellStats(population, 'sum', na.rm = TRUE)
+totalpopulationconstant = sum(values(population), na.rm=T)
 
 T.filename <- 'study.area.T_kenya.rds'
 T.GC.filename <- 'study.area.T.GC_kenya.rds'
@@ -56,7 +53,7 @@ repeat {
     return(x)
   })
   
-  k_acc = cellStats(population, 'sum', na.rm = TRUE)/totalpopulationconstant
+  k_acc = cellStats(population, fun='sum', na.rm = TRUE)/totalpopulationconstant
   print(paste0("Fraction of populationulation more than 60 minutes away from healthcare: ", k_acc))
   # exit if the condition is met
   if (k_acc==0) break
@@ -102,9 +99,6 @@ functpopulation<-parLapply(cluster,1:nrow(new_facilities),function(i){
 
 stopCluster(cluster)
 
-
-population = raster(paste0(input_folder , 'Population.tif'))
-
 for (i in 1:length(functpopulation)){
   if (class(functpopulation[[i]]$p)[1]=="sfc_MULTIPOLYGON"){
     print(i)
@@ -140,4 +134,4 @@ pol$populationsum = pp
 
 pol$id = paste0("cl", 1:nrow(pol))
 
-write_sf(pol, paste0(repo_folder, 'clusters_tt_based.gpkg'))
+write_sf(pol, paste0(home_repo_folder, 'clusters_final.gpkg'))

@@ -14,8 +14,6 @@ fun = function(x, y){
 model$coefficients[2] * x + model$coefficients[3] * y + model$coefficients[1] + x*y*model$coefficients[4]
 }
 
-library(rgl)
-
 persp3d(fun, 
         xlim = c(10, 50), ylim = c(1/1000, 10/1000))
 

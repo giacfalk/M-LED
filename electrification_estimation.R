@@ -32,25 +32,18 @@ population <- ee_as_raster(
 clusters$pop <- exactextractr::exact_extract(population, clusters, fun="sum")
 clusters$noacc <- exactextractr::exact_extract(popnoaccess2018, clusters, fun="sum")
 
-##
-
-popnoaccess2018 = raster(paste0(processed_folder , 'noaccess/pop18_noaccess_kenya.tif'))
-population = raster(paste0(processed_folder , 'noaccess/pop18_kenya.tif'))
-
 # adjust
 somma = sum(clusters$pop)
 spread = ((national_official_population-somma)/somma)
-
 print(spread)
+clusters$pop <- clusters$pop * (1+spread)
 
-clusters$pop <- clusters$pop * 1+spread
 
 somma = sum(clusters$noacc)
 spread = (((national_official_population*(1-national_official_elrate))-somma)/somma)
-
 print(spread)
-
-clusters$noacc <- clusters$noacc * 1+spread
+clusters$noacc <- clusters$noacc * (1+spread)
 
 # estimate electrification rate of each cluster
 clusters$elrate <- 1- (clusters$noacc/clusters$pop)
+clusters$elrate <- ifelse(clusters$elrate < 0, 0, clusters$elrate)

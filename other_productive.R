@@ -139,6 +139,7 @@ clusters2$geom<- NULL
 clusters2$geometry<- NULL
 clusters2 <- clusters2[!duplicated(clusters2[,c('id')]),]
 clusters2 <- dplyr::select(clusters2, -id) 
+clusters <- dplyr::select(clusters, -starts_with("HCW")) 
 clusters2 <- bind_cols(clusters, clusters2)
 
 # run PCA
@@ -148,7 +149,7 @@ clusters2$geom<-NULL
 clusters2$popdens=clusters2$pop/clusters2$area
 clusters2$employment = (clusters2$EMEMPLMEMC + clusters2$EMEMPLWEMC)/2
 
-data_pca = dplyr::select(clusters2, HCWIXQPHGH1, employment, popdens, traveltime)
+data_pca = dplyr::select(clusters2, HCWIXQPHGH, employment, popdens, traveltime)
 data_pca$geometry=NULL
 data_pca$geom=NULL
 
@@ -157,7 +158,7 @@ x[is.na(x)] <- mean(x, na.rm = TRUE)
 x
 })
 
-data_pca <- lapply(data_pca, function(x) round((x-min(x))/(max(x)-min(x)), 2)) %>% bind_cols()
+data_pca <- lapply(data_pca, function(x) round((x-min(x, na.rm=T))/(max(x, na.rm=T)-min(x, na.rm=T)), 2)) %>% bind_cols()
 
 data_pca_bk <- data_pca
 
@@ -261,8 +262,5 @@ clusters_prod <- mutate(clusters_prod, !!paste0("residual_productive_tt_", m) :=
 
 clusters <- clusters_prod
 
-gdata::keep(clusters, gadm0, home_repo_folder, input_folder, processed_folder, spam_folder, sure = T)
+gdata::keep(clusters, gadm0, sure = T)
 source("manual_parameters.R", echo = F)
-
-###
-

@@ -71,6 +71,7 @@ clusters <- bind_cols(clusters, pet, ppt, soil)
 
 # Define crop factor for each day of the year based on sum of beginning of growing seasons and length of each growing period
 for (i in 1:nrow(crops)){
+print(crops$crop[i])
 daily=data.frame("daily" = c(1:729))
 daily$date = seq(as.Date("2019-01-01"), length.out = 729, by = "days")
 daily$month = lubridate::month(daily$date)
@@ -79,14 +80,17 @@ daily$day = lubridate::day(daily$date)
 pm1= as.Date(paste0(crops[i, 'pm_1'], "2019"), format= "%d%m%Y")
 pm2= as.Date(paste0(crops[i, 'pm_2'], "2019"), format= "%d%m%Y")
 
+# crop factor in each day of the year for growing period 1
 daily['k_c'] = ifelse((daily$date>= pm1) & (daily$date < (pm1 + as.numeric(crops[i, 'nd_1']))), as.numeric(crops[i, 'cf_1']),ifelse((daily$date>= pm1 + as.numeric(crops[i, 'nd_1'])) & (daily$date < (pm1 + as.numeric(crops[i, 'nd_1']) + as.numeric(crops[i, 'nd_2']))), as.numeric((crops[i, 'cf_1'] + crops[i, 'cf_2'])/2), ifelse((daily$date>= pm1) & (daily$date < (pm1 + as.numeric(crops[i, 'nd_1']) + as.numeric(crops[i, 'nd_2']) + as.numeric(crops[i, 'nd_3']))), as.numeric((crops[i, 'cf_2'] + crops[i, 'cf_3'])/2), ifelse((daily$date>= pm1) & (daily$date < (pm1 + as.numeric(crops[i, 'nd_1']) + as.numeric(crops[i, 'nd_2']) + as.numeric(crops[i, 'nd_3'])+ as.numeric(crops[i, 'nd_4']))), as.numeric(crops[i, 'cf_3']), 0)))) 
-                                                                                                                                                                                         
+
+# crop factor in each day of the year for growing period 2
 daily['k_c2'] = ifelse((daily$date>= pm2) & (daily$date < (pm2 + as.numeric(crops[i, 'nd_1']))), as.numeric(crops[i, 'cf_1']),ifelse((daily$date>= pm2 + as.numeric(crops[i, 'nd_1'])) & (daily$date < (pm2 + as.numeric(crops[i, 'nd_1']) + as.numeric(crops[i, 'nd_2']))), as.numeric((crops[i, 'cf_1'] + crops[i, 'cf_2'])/2), ifelse((daily$date>= pm2) & (daily$date < (pm2 + as.numeric(crops[i, 'nd_1']) + as.numeric(crops[i, 'nd_2']) + as.numeric(crops[i, 'nd_3']))), as.numeric((crops[i, 'cf_2'] + crops[i, 'cf_3'])/2), ifelse((daily$date>= pm2) & (daily$date < (pm2 + as.numeric(crops[i, 'nd_1']) + as.numeric(crops[i, 'nd_2']) + as.numeric(crops[i, 'nd_3'])+ as.numeric(crops[i, 'nd_4']))), as.numeric(crops[i, 'cf_3']), 0)))) 
 
+# crop factor in each day of the year for both growing periods
 daily <- daily %>% mutate(k_c = pmax(k_c, k_c2), na.rm = T)
-
 daily = daily %>% group_by(month, day) %>% summarise(k_c = max(k_c))
 
+# daily potential evapotransperation
 daily$date = seq(as.Date("2019-01-01"), length.out = 366, by = "days")
 
 for (k in 1:365){
@@ -103,7 +107,6 @@ clusters[paste0("ET_",  as.character(crops[i,1]), "_" , as.character(daily[k,1])
 # Summarise ETc by month by crop
 for (i in 1:nrow(crops)){ 
   for (z in 1:12){  
-  print(z)
     
 aa <- clusters
 aa$geometry=NULL
@@ -125,7 +128,7 @@ aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-#Convert PPT to total m3 per cluster per month per crop (???)
+#Convert PPT to total m3 per cluster per month per crop 
 clusters[paste0('monthly_PPT_' , as.character(crops[i,1]) , "_" , as.character(z))] = as.vector(aa[paste0('PPT_' , as.character(ifelse(nchar(as.character(z)) == 1, paste0("0" , as.character(z)), as.character(z))))] * eta * 10 * aa[paste0("A_" , as.character(crops[i,1]))])
 
 #Calculate irrigation requirement per cluster per month per crop in m3 considering different irrigation efficiency per each crop 
