@@ -17,7 +17,7 @@ The platform has been developed and tested in a Windows 10 environment.
 **NB: These steps are only necessary when setting up the environment for the first time. NB2: The `.\installdependencies.cmd` file MUST be run with administrator priviledges (right click -> run as administrator)**
 
 ## Operating the platform
-1. Open the MLED_hourly.R in RStudio (R 3.5+)
+1. Open the MLED_hourly.R in RStudio (R 3.6+)
 
 3. Open the manual_parameters.R file and set the correct file path for where you have extracted the M-LED database input data and define other local parameters
 
