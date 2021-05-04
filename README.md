@@ -19,11 +19,9 @@ The platform has been developed and tested in a Windows 10 environment.
 ## Operating the platform
 1. Open the MLED_hourly.R in RStudio (R 3.5+)
 
-2. Navigate to the path where the cloned repository is located and open the .\wrapper.py file.
+3. Open the manual_parameters.R file and set the correct file path for where you have extracted the M-LED database input data and define other local parameters
 
-3. Open the manual_parameters.R file and set the correct file path for where you have extracted the M-LED database input data
-
-4. Run the whole script or its individual modules
+3. Run the whole script or source its individual modules
 
 ## Customising the analysis
 -> See the repo's Wiki (https://github.com/giacfalk/M-LED/wiki)
