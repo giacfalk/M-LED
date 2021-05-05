@@ -5,7 +5,7 @@
 ![alt text](https://github.com/giacfalk/M-LED/blob/master/logo.png?raw=true)
 
 ####
-The platform has been developed and tested in a Windows 10 environment. 
+The platform has been developed and tested in a Windows 10 environment connected to the Internet (a connection is required to operate Google Earth Engine API calls). 
 
 ## Setting up the environment
 1. Clone the MLED repository and extract it in a custom location.
