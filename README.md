@@ -5,7 +5,7 @@
 ![alt text](https://github.com/giacfalk/M-LED/blob/master/logo.png?raw=true)
 
 ####
-The platform has been developed and tested in a Windows 10 environment. 
+The platform has been developed and tested in a Windows 10 environment connected to the Internet (a connection is required to operate Google Earth Engine API calls). 
 
 ## Setting up the environment
 1. Clone the MLED repository and extract it in a custom location.
@@ -17,13 +17,11 @@ The platform has been developed and tested in a Windows 10 environment.
 **NB: These steps are only necessary when setting up the environment for the first time. NB2: The `.\installdependencies.cmd` file MUST be run with administrator priviledges (right click -> run as administrator)**
 
 ## Operating the platform
-1. Open the MLED_hourly.R in RStudio (R 3.5+)
+1. Open the MLED_hourly.R in RStudio (R 3.6+)
 
-2. Navigate to the path where the cloned repository is located and open the .\wrapper.py file.
+3. Open the manual_parameters.R file and set the correct file path for where you have extracted the M-LED database input data and define other local parameters
 
-3. Open the manual_parameters.R file and set the correct file path for where you have extracted the M-LED database input data
-
-4. Run the whole script or its individual modules
+3. Run the whole script or source its individual modules
 
 ## Customising the analysis
 -> See the repo's Wiki (https://github.com/giacfalk/M-LED/wiki)
