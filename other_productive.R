@@ -17,12 +17,12 @@ for (X in files){
 }
 
 # Multiply yearly yield of each crop by unit processing energy requirement to estimate yearly demand in each cluster as the sum of each crop processing energy demand
-for (X in energy_crops$ï..Crop){
+for (X in as.vector(energy_crops[,1])){
   aa <- clusters
   aa$geometry=NULL
   aa$geom=NULL
   
-  clusters[paste0("kwh_" , X , "_tot")] = pull(aa[paste0("yield_", X, "_tot")]) * energy_crops$kwh_kg[energy_crops$ï..Crop == X] 
+  clusters[paste0("kwh_" , X , "_tot")] = pull(aa[paste0("yield_", X, "_tot")]) * energy_crops$kwh_kg[as.vector(energy_crops[,1]) == X] 
 }
 
 aa <- clusters
@@ -33,7 +33,7 @@ clusters['kwh_cp_tt'] = as.vector(aa %>%  select(starts_with('kwh')) %>% rowSums
 
 # processing to take place in post-harvesting months: for each crop 1) take harvesting date 2) take plantation months. for those months between 1 and 2 equally allocate crop processing
 
-crops <-  crops[crops$crop %in% energy_crops$ï..Crop, ]
+crops <-  crops[crops$crop %in% as.vector(energy_crops[,1]), ]
 
 for (i in 1:nrow(crops)){
   for (m in 1:12){
@@ -131,7 +131,7 @@ result <- qgis_run_algorithm(
 
 clusters2 <- sf::read_sf(qgis_output(result, "OUTPUT"))
 
-gdata::keep(clusters, clusters2, gadm0, home_repo_folder, input_folder, processed_folder, spam_folder, sure = T)
+gdata::keep(clusters, clusters2, gadm0, home_repo_folder, input_folder, processed_folder, spam_folder, load_curve_prod_act, sure = T)
 save.image(file="bk1_1.Rdata")
 
 # bind...
@@ -167,15 +167,15 @@ data_pca <- prcomp(data_pca)
 PCs <- as.data.frame(data_pca$x)
 PCs$PCav <- PCs$PC1
 
-# rescale PCA to 0.3  - 0.6 range
+# scales::rescale PCA to 0.3  - 0.6 range
 
-PCs$PCav <- rescale(PCs$PCav, to = c(0.6, 0.3))
+PCs$PCav <- scales::rescale(PCs$PCav, to = c(0.6, 0.3))
 
 # hist of variables
 
 hist <- data.frame(data_pca_bk, PCs$PCav)
 
-hist$PCs.PCav <- rescale(hist$PCs.PCav, to = c(0, 1))
+hist$PCs.PCav <- scales::rescale(hist$PCs.PCav, to = c(0, 1))
 
 colnames(hist) <- c("Highest wealth share", "Employment rate", "Population density", "City accessibility", "PCA")
 
@@ -192,6 +192,7 @@ hist <- tidyr::gather(hist, key="var", value="value", 1:5)
 # 
 
 clusters_prod <- cbind(clusters, PCs$PCav)
+clusters_prod$PCs.PCav <- scales::rescale(clusters_prod$PCs.PCav, to = c(0.6, 0.3))
 
 #ggplot(clusters)+
 #geom_clusters(aes(fill=PCs.PCav))
@@ -239,9 +240,11 @@ clusters_residential$hour = as.numeric(clusters_residential$hour)
 
 clusters_residential_2 = group_by(clusters_residential, hour) %>% mutate(media = mean(value, na.rm=T)) %>% ungroup() %>% group_by(month) %>% mutate(value = value/media)
 
-# use calculated ratios to rescale load curve of productive activities for each monthly
+# use calculated ratios to scales::rescale load curve of productive activities for each monthly
 
-load_curve_prod_act <- merge(clusters_residential_2, load_curve_prod_act,  by.x="hour", by.y="ï..Hour", all.x=T)
+load_curve_prod_act$ï..Hour[load_curve_prod_act$ï..Hour==0] <- 24
+
+load_curve_prod_act <- merge(clusters_residential_2, load_curve_prod_act,  by.x="hour", by.y="ï..Hour")
 
 load_curve_prod_act$load_curve <- load_curve_prod_act$value * load_curve_prod_act$Share
 
@@ -263,4 +266,3 @@ clusters_prod <- mutate(clusters_prod, !!paste0("residual_productive_tt_", m) :=
 clusters <- clusters_prod
 
 gdata::keep(clusters, gadm0, sure = T)
-source("manual_parameters.R", echo = F)

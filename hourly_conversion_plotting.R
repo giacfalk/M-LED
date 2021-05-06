@@ -1,6 +1,15 @@
 cl_bk <- clusters
 
+source_lines <- function(file, lines){
+  source(textConnection(readLines(file)[lines]))
+}
+
+source("manual_parameters.R")
+source_lines("scenario_baseline.R", 230:237)
+
 geogeo <- clusters$geometry
+
+clusters <- cl_bk
 
 if (is.null(geogeo)){
     geogeo <- clusters$geom
@@ -8,6 +17,8 @@ if (is.null(geogeo)){
 
 clusters$geometry=NULL
 clusters$geom=NULL
+
+####
 
 sf_irrig = dplyr::select(clusters,starts_with("er_kwh_tt"))
 
@@ -49,6 +60,10 @@ irrigation <- ggplot(sf_irrig, aes(x=as.numeric(hour), y=value_irrigation/1000, 
 ### Crop processing ###
 sf_croppro = dplyr::select(clusters,starts_with("kwh_cropproc_tt"))
 
+for (i in 1:ncol(sf_croppro)){
+  sf_croppro[,i] <-  ifelse(is.infinite(sf_croppro[,i]), 0, sf_croppro[,i])
+  }
+
 sf_croppro$id = 1:nrow(clusters)
 
 sf_croppro = tidyr::gather(sf_croppro, "month_tt", "value_tt", 1:12)
@@ -85,8 +100,14 @@ crop_pro <- ggplot(sf_croppro, aes(x=as.numeric(hour), y=value_cropproation/1000
   scale_colour_discrete(name="Month")
 
 ## Health ##
+gc()
 sf_health = dplyr::select(clusters, id, starts_with("er_hc_"))
 sf_health$er_hc_tt = NULL
+
+for (i in 1:ncol(sf_health)){
+  sf_health[,i] <-  ifelse(is.infinite(sf_health[,i]) | is.nan(sf_health[,i]) | is.na(sf_health[,i]) , 0, sf_health[,i])
+}
+
 
 sf_health$er_hc_tt_monthly_1 = ifelse(clusters$elrate>0.75, 0, sf_health$er_hc_tt_monthly_1 )
 sf_health$er_hc_tt_monthly_2 = ifelse(clusters$elrate>0.75, 0, sf_health$er_hc_tt_monthly_2 )
@@ -118,7 +139,7 @@ sf_health = dplyr::select(sf_health, hour, value, month) %>% group_by(hour, mont
 sf_health$hour = as.numeric(sf_health$hour)
 
 
-health<-ggplot(sf_health, aes(x=as.numeric(hour), y=value/1000))+
+health<-ggplot(sf_health, aes(x=as.numeric(hour), y=value))+
   theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
@@ -129,8 +150,14 @@ health<-ggplot(sf_health, aes(x=as.numeric(hour), y=value/1000))+
   scale_colour_discrete(name="Month")
 
 ## Edu ##
+gc()
 sf_edu = dplyr::select(clusters, id, starts_with("er_sch_"))
 sf_edu$er_sch_tt = NULL
+
+for (i in 1:ncol(sf_edu)){
+  sf_edu[,i] <-  ifelse(is.infinite(sf_edu[,i]) | is.nan(sf_edu[,i]) | is.na(sf_edu[,i]) , 0, sf_edu[,i])
+}
+
 
 sf_edu$er_sch_tt_monthly_1 = ifelse(clusters$elrate>0.75, 0, sf_edu$er_sch_tt_monthly_1 )
 sf_edu$er_sch_tt_monthly_2 = ifelse(clusters$elrate>0.75, 0, sf_edu$er_sch_tt_monthly_2 )
@@ -161,7 +188,7 @@ sf_edu = dplyr::select(sf_edu, hour, value, month) %>% group_by(hour, month) %>%
 
 sf_edu$hour = as.numeric(sf_edu$hour)
 
-edu<-ggplot(sf_edu, aes(x=as.numeric(hour), y=value/1000))+
+edu<-ggplot(sf_edu, aes(x=as.numeric(hour), y=value/10000))+
   theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
@@ -172,9 +199,13 @@ edu<-ggplot(sf_edu, aes(x=as.numeric(hour), y=value/1000))+
   scale_colour_discrete(name="Month")
 
 ## Residential
-
+gc()
 sf_residential = dplyr::select(clusters, id, starts_with("PerHHD_")) %>% as.data.frame()
 sf_residential$PerHHD_tt = NULL
+
+for (i in 1:ncol(sf_residential)){
+  sf_residential[,i] <-  ifelse(is.infinite(sf_residential[,i]) | is.nan(sf_residential[,i]) | is.na(sf_residential[,i]) , 0, sf_residential[,i])
+}
 
 sf_residential$PerHHD_tt_monthly_1 = as.numeric(sf_residential$PerHHD_tt_monthly_1) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
 sf_residential$PerHHD_tt_monthly_2 = as.numeric(sf_residential$PerHHD_tt_monthly_2) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
@@ -208,7 +239,7 @@ sf_residential = dplyr::select(sf_residential, hour, value, month) %>% group_by(
 
 sf_residential$hour = as.numeric(sf_residential$hour)
 
-residential <-ggplot(sf_residential, aes(x=as.numeric(hour), y=value/1000))+
+residential <-ggplot(sf_residential, aes(x=as.numeric(hour), y=value/10000000))+
   theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
@@ -221,8 +252,12 @@ residential <-ggplot(sf_residential, aes(x=as.numeric(hour), y=value/1000))+
 ######
 # residual productive
 ## residual_productive
-
+gc()
 sf_residual_productive = dplyr::select(clusters, id, starts_with("residual_productive_")) %>% as.data.frame()
+
+for (i in 1:ncol(sf_residual_productive)){
+  sf_residual_productive[,i] <-  ifelse(is.infinite(sf_residual_productive[,i]) | is.nan(sf_residual_productive[,i]) | is.na(sf_residual_productive[,i]) , 0, sf_residual_productive[,i])
+}
 
 sf_residual_productive$residual_productive_tt_1 = as.numeric(sf_residual_productive$residual_productive_tt_1) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
 sf_residual_productive$residual_productive_tt_2 = as.numeric(sf_residual_productive$residual_productive_tt_2) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
@@ -236,6 +271,10 @@ sf_residual_productive$residual_productive_tt_9 = as.numeric(sf_residual_product
 sf_residual_productive$residual_productive_tt_10 = as.numeric(sf_residual_productive$residual_productive_tt_10) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
 sf_residual_productive$residual_productive_tt_11 = as.numeric(sf_residual_productive$residual_productive_tt_11) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
 sf_residual_productive$residual_productive_tt_12 = as.numeric(sf_residual_productive$residual_productive_tt_12) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
+
+for (i in 1:ncol(sf_residual_productive)){
+  sf_residual_productive[,i] <-  ifelse(is.infinite(sf_residual_productive[,i]) | is.nan(sf_residual_productive[,i]) | is.na(sf_residual_productive[,i]) , 0, sf_residual_productive[,i])
+}
 
 sf_residual_productive_tt = tidyr::gather(sf_residual_productive %>% dplyr::select(290:301, 1), "date_tt", "value_tt", 1:12)
 
@@ -253,7 +292,7 @@ sf_residual_productive = dplyr::select(sf_residual_productive, hour, value, mont
 
 sf_residual_productive$hour = as.numeric(sf_residual_productive$hour)
 
-residual_productive <-ggplot(sf_residual_productive, aes(x=as.numeric(hour), y=value/1000))+
+residual_productive <-ggplot(sf_residual_productive, aes(x=as.numeric(hour), y=value/100000000))+
   theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
