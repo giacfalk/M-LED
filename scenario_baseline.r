@@ -133,13 +133,13 @@ ppt = stack(paste0(input_folder , "TerraClimate/TerraClimate_ppt_2015.tif"))
 soil = stack(paste0(input_folder , "TerraClimate/TerraClimate_soil_2015.nc"))
 
 #
-roads<-read_sf(paste0(input_folder, '/onsset/input/Roads/RoadsKEN.shp'))
+roads<-read_sf(paste0(input_folder, 'RoadsKEN.shp'))
 
 empl_wealth<-read_sf(paste0(input_folder, '/jrc/wealth_employment/shps/sdr_subnational_data_dhs_2014.shp'))
 
 traveltime <- raster(paste0(input_folder, 'travel.tif'))
 
-traveltime_market = raster(paste0(processed_folder, 'wholesale/traveltime_market.tif'))
+traveltime_market = raster(paste0(input_folder, 'traveltime_market.tif'))
 
 #
 DepthToGroundwater = read.delim(paste0(input_folder , 'DepthToGroundwater/xyzASCII_dtwmap_v1.txt'), sep='\t')
@@ -158,7 +158,7 @@ population <- raster(paste0(input_folder, "GHS_POP_E2015_GLOBE_R2019A_4326_30ss_
 population <- rgis::mask_raster_to_polygon(population, gadm0)
 
 #
-dhs = read_sf(paste0(db_folder , '_SSA/statcompiler_subnational_data_2020-03-17/shps/sdr_subnational_data_dhs_2015.shp'))
+dhs = read_sf(paste0(input_folder , 'statcompiler_subnational_data_2020-03-17/shps/sdr_subnational_data_dhs_2015.shp'))
 
 # Classifying schools and healthcare facilities
 health = read_xlsx(paste0(health_edu_folder , "GeoHealth Data.xlsx"))
