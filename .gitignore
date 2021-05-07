@@ -120,3 +120,6 @@ residual_productive-DESKTOP-6BKTP84.r
 .Rproj.user
 archive/clustering/clusters_60min_1km.dbf
 *.py
+*.RData
+errori.txt
+todo.R

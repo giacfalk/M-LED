@@ -5,13 +5,14 @@ clusters = read_sf(paste0(home_repo_folder, 'clusters_final.gpkg'))
 rasters_rainfed = list.files(path = paste0(spam_folder, "spam2010v1r0_global_yield.geotiff") , pattern = 'r.tif')
 
 # Import all Yield (kg/ha) cropland layers (Default datasets used: MapSPAM)
-rasters_irrigated = rasters_rainfed = list.files(path = paste0(spam_folder, "spam2010v1r0_global_yield.geotiff") , pattern = 'i.tif')
+rasters_irrigated = list.files(path = paste0(spam_folder, "spam2010v1r0_global_yield.geotiff") , pattern = 'i.tif')
 
 # 1) Estimate the yield gap
 #Calculate zonal statistics for each crop for yield in rainfed areas
 # NB: when using MapSPAM use harvested area, which accounts for multiple growing seasons per year)
 
-for (X in files){
+for (X in rasters_rainfed){
+  print(X)
   a = paste0("Y_" , gsub("_r.tif", "", gsub("spam2010v1r0_global_yield_", "", X)))
   clusters[a] <- exactextractr::exact_extract(raster(paste0(spam_folder, "spam2010v1r0_global_yield.geotiff/", X)), clusters, fun="mean")
   
@@ -19,7 +20,7 @@ for (X in files){
   aa$geometry=NULL
   aa$geom=NULL
   
-  clusters <- clusters %>%  mutate(!!paste0("yield_", gsub("_r.tif", "", gsub("spam2010v1r0_global_yield_", "", X)), "_tot") := (!!as.name(a)) * pull(!!aa[paste0("A_", gsub("_r.tif", "", gsub("spam2010v1r0_global_yield_", "", X)))])) 
+  clusters <- clusters %>%  mutate(!!paste0("Y_", gsub("_r.tif", "", gsub("spam2010v1r0_global_yield_", "", X)), "_tot") := (!!as.name(a)) * pull(!!aa[paste0("A_", gsub("_r.tif", "", gsub("spam2010v1r0_global_yield_", "", X)))])) 
 }
 
 climatezones = raster(paste0(input_folder, 'GAEZ_climatezones.tif'))
@@ -75,11 +76,15 @@ for (crop in unique(list$crop)){
   aa$geometry=NULL
   aa$geom=NULL
   
-clusters[paste0("yg_", crop)] <- 
+clusters <- clusters %>%  mutate(!!paste0(paste0("yg_", crop)) := (pull(!!aa[paste0("A_", crop)]))*list$mean[list$crop==crop & list$zone==clusters$climatezones]) 
 
 }
 
-clusters['yg_total'] = as.vector(aa %>%  select(starts_with('yg_')) %>% rowSums(na.rm = T) %>% as.numeric())
+aa <- clusters
+aa$geometry=NULL
+aa$geom=NULL
+
+clusters$yg_total = as.vector(aa %>%  select(starts_with('yg_')) %>% rowSums(na.rm = T) %>% as.numeric())
 
 # 2) Calculate potential economic revenue based on value of crops 
 ####
@@ -89,26 +94,17 @@ clusters['yg_total'] = as.vector(aa %>%  select(starts_with('yg_')) %>% rowSums(
 
 # Process crop prices csv and convert it to a shapefile
 prices = read.csv(paste0(input_folder, 'prices_with_coordinates.csv'))
-
-prices <- st_as_sf(prices, coords=c("x", "y"), crs=4326)
-
-prices.columns = ['City'] + ['pri_' + str(col) for col in prices.columns[1:43]] +  ['geometry']
-
-write_sf(prices, paste0(processed_folder, 'prices_with_coordinates.gpkg'))
-
-# Read the shapefile
-localprices = QgsVectorLayer(processed_folder + 'prices_with_coordinates.gpkg', "", "ogr")
+prices <- st_as_sf(prices, coords=c("ï..X", "Y"), crs=4326)
 
 # Merge polygons based on nearest neighbour (i.e. define the local price for each crop)
 result <- qgis_run_algorithm(
   "native:joinbynearest",
   INPUT = clusters,
-  INPUT_2 = localprices,
+  INPUT_2 = prices,
   NEIGHBORS = 1
 )
 
 clusters <- sf::read_sf(qgis_output(result, "OUTPUT"))
-
 
 # Sum up to calculate total new local revenue (BENEFIT from YIELD DUE TO IRRIGATION)
 # NB: No yield gain possible if distance/depth thresholds to water are not met
@@ -120,6 +116,10 @@ for (i in 1:lenght(cols)){
 mostsimilar <- agrep(cols[i],ygs,value=T)
 clusters["added_" + i] <- clusters[paste0("pri_", i)] * clusters[mostsimilar]
 }
+
+aa <- clusters
+aa$geometry=NULL
+aa$geom=NULL
 
 clusters['tt_ddvl'] = as.vector(aa %>%  select(starts_with('added_')) %>% rowSums(na.rm = T) %>% as.numeric())
 
@@ -138,7 +138,6 @@ clusters$transp_costs = 2 * (clusters$wholesalemean*fuel_consumption*clusters$di
 
 # lack of market access makes the gains unprofitable
 clusters$tt_ddvl = ifelse(clusters$remote_from_market==1, 0, clusters$tt_ddvl)
-
 
 # 4) Calculate cost for purchasing household appliances (for both new electrified and tier shift households)
 
