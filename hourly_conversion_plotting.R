@@ -318,12 +318,8 @@ Irrigation<-sum(irrigation$data$value_irrigation)*30
 Crop_processing<-sum(crop_pro$data$value_cropproation)*30
 Comm_prod <- sum(residual_productive$data$value)*30
 
-print("Latent demand (estimated) TWh")
+print("Latent demand (estimated) TWh:")
 sum(Residential, Education, Healthcare, Irrigation, Crop_processing, Comm_prod)/1000000000  
-
-print("Total power demand: 7.86 TWh")
-
-sum(Residential, Education, Healthcare, Irrigation, Crop_processing, Comm_prod)/1000000000/7.86
 
 df <- as.data.frame(rbind(Residential, Education, Healthcare, Irrigation, Crop_processing, Comm_prod))
 df$sector<-rownames(df)
@@ -338,22 +334,16 @@ barplot <- ggplot(df, aes(x=sector, y=V1/1000000000))+
 
 ggsave("barplot_sectors.png", barplot, device = "png", scale=1, width = 7, height = 5)
 
-
 ############
 
-country <- st_union(gadm1) %>% st_as_sf()
+source_lines("scenario_baseline.R", c(7, 99:103))
 
-gadm1_demo <- gadm1
-gadm1_demo$geometry=NULL
-gadm1_demo = gadm1_demo[1,]
-country <- bind_cols(gadm1_demo, country) %>% st_as_sf()
-country$CAPTION = countryname
-country$geometry = country$x
-country$x=NULL  
-country = st_as_sf(country)
-st_crs(country) <- 4326
-st_crs(gadm1) <- 4326
-gadm1 <- purrr::reduce(list(gadm1, country), clusters:::rbind.clusters)
+country_temp <- st_union(gadm1) %>% st_as_sf()
+country <- gadm1[1,]
+country$NAME_1 <- countryiso3
+country$geometry <- country_temp$x
+
+gadm1 <- bind_rows(gadm1, country)
 
 template <- raster(paste0(db_folder, '/input_folder/template_1km.tif'))
 
@@ -362,8 +352,6 @@ clusters$geometry=geogeo
 clusters = st_as_sf(clusters)
 
 clusters <- mutate(clusters, sf_residential_tt = (30 * (as.numeric(PerHHD_tt_monthly_1) + as.numeric(PerHHD_tt_monthly_2) + as.numeric(PerHHD_tt_monthly_3) + as.numeric(PerHHD_tt_monthly_4) + as.numeric(PerHHD_tt_monthly_5) + as.numeric(PerHHD_tt_monthly_6) + as.numeric(PerHHD_tt_monthly_7) + as.numeric(PerHHD_tt_monthly_8) + as.numeric(PerHHD_tt_monthly_9) + as.numeric(PerHHD_tt_monthly_10) + as.numeric(PerHHD_tt_monthly_11) + as.numeric(PerHHD_tt_monthly_12))/1000) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)) 
-
-#group_by(clusters, isurbanmajority) %>% mutate(a=(ifelse(sf_residential_tt>1, sf_residential_tt, NA) * 1000)/(as.numeric(HHs) * (noacc/pop))) %>% summarise(a=mean(a, na.rm=T))
 
 clusters <-clusters <- mutate(clusters, sf_croppro = (30 * (as.numeric(kwh_cropproc_tt_1) + as.numeric(kwh_cropproc_tt_2) + as.numeric(kwh_cropproc_tt_3) + as.numeric(kwh_cropproc_tt_4) + as.numeric(kwh_cropproc_tt_5) + as.numeric(kwh_cropproc_tt_6) + as.numeric(kwh_cropproc_tt_7) + as.numeric(kwh_cropproc_tt_8) + as.numeric(kwh_cropproc_tt_9) + as.numeric(kwh_cropproc_tt_10) + as.numeric(kwh_cropproc_tt_11) + as.numeric(kwh_cropproc_tt_12))/1000))
 
@@ -378,6 +366,18 @@ clusters$sf_edu_tt<-30* as.numeric(clusters$er_sch_tt)/1000
 clusters$sf_edu_tt = ifelse(clusters$elrate>0.75, 0, clusters$sf_edu_tt )
 
 clusters = mutate(clusters, sf_residual_productive_tt = (30 * (as.numeric(residual_productive_tt_1) + as.numeric(residual_productive_tt_2) + as.numeric(residual_productive_tt_3) + as.numeric(residual_productive_tt_4) + as.numeric(residual_productive_tt_5) + as.numeric(residual_productive_tt_6) + as.numeric(residual_productive_tt_7) + as.numeric(residual_productive_tt_8) + as.numeric(residual_productive_tt_9) + as.numeric(residual_productive_tt_10) + as.numeric(residual_productive_tt_11) + as.numeric(residual_productive_tt_12))/1000)* as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop))
+
+clusters$sf_residential_tt <- ifelse(is.nan(clusters$sf_residential_tt), 0, clusters$sf_residential_tt)
+
+clusters$sf_croppro <- ifelse(is.nan(clusters$sf_croppro), 0, clusters$sf_croppro)
+
+clusters$sf_irrig <- ifelse(is.nan(clusters$sf_irrig), 0, clusters$sf_irrig)
+
+clusters$sf_health_tt <- ifelse(is.nan(clusters$sf_health_tt), 0, clusters$sf_health_tt)
+
+clusters$sf_edu_tt <- ifelse(is.nan(clusters$sf_edu_tt), 0, clusters$sf_edu_tt)
+
+clusters$sf_residual_productive_tt <- ifelse(is.nan(clusters$sf_residual_productive_tt), 0, clusters$sf_residual_productive_tt)
 
 sf_residential_tt <- fasterize::fasterize(clusters, template, field ="sf_residential_tt", fun="sum")
 
@@ -398,17 +398,18 @@ gadm1$Irrigation<- exactextractr::exact_extract(sf_irrig, gadm1, fun="sum")
 gadm1$Crop_processing<- exactextractr::exact_extract(sf_croppro, gadm1, fun="sum")
 gadm1$Comm_prod<- exactextractr::exact_extract(sf_residual_productive_tt, gadm1, fun="sum")
 
-gadm1 <- gather(gadm1, key = "sector", value = "value", 6:11)
-gadm1$kenya <- ifelse(gadm1$CAPTION==countryname, 0, 1)
+gadm1 <- gather(gadm1, key = "sector", value = "value", 12:17)
 
-barplot_prov <- ggplot(gadm1, aes(x=CAPTION, y=value/100000000))+
+gadm1$countryiso3 <- ifelse(gadm1$NAME_1==countryiso3, 0, 1)
+
+barplot_prov <- ggplot(gadm1, aes(x=NAME_1, y=value/100000000))+
   theme_classic()+
   geom_bar(aes(fill=sector), position = "stack", stat = "identity", colour="black", lwd=0.01)+
   scale_y_continuous(name="Yearly latent electricity demand (TWh)")+
   xlab("Province")+
   scale_fill_discrete(name="Sector")+
   theme(legend.position = "bottom", legend.direction = "horizontal", strip.background = element_blank(), strip.text = element_blank())+
-  facet_wrap(vars(gadm1$kenya), scales = "free", space="free")
+  facet_wrap(vars(gadm1$countryiso3), scales = "free")
 
 gt = ggplot_gtable(ggplot_build(barplot_prov))
 gt$widths[5] = 0.3*gt$widths[5]
@@ -416,13 +417,9 @@ grid.draw(gt)
 
 ggsave("gadm1.png", gt, scale = 1.3)
 
-gadm1_without = gadm1
-gadm1_without$geometry=NULL
+gadm1_map <- gadm1[-nrow(gadm1),]
 
-View(gadm1_without %>% group_by(CAPTION) %>% summarise(value=sum(value/100000000)))
-View(gadm1_without %>% group_by(sector, CAPTION) %>% summarise(value=sum(value/100000000)))
-
-map_regions <- ggplot(gadm1, aes(fill=CAPTION))+
+map_regions <- ggplot(gadm1_map, aes(fill=NAME_1))+
   theme_classic()+
   geom_sf()+
   scale_fill_brewer(palette = "Set2", name="Regions")
@@ -430,7 +427,7 @@ map_regions <- ggplot(gadm1, aes(fill=CAPTION))+
 ggsave("regions_map.png", map_regions, device = "png")
 
 # raster to polygons (clusters)
-grd <- clusters::st_make_grid(gadm1, cellsize = 0.0083, square = T, what = "polygons", crs = 4326)
+grd <- sf::st_make_grid(gadm0, cellsize = 0.0083, square = T, what = "polygons", crs = 4326)
 grd <- st_as_sf(grd)
 
 # extract sum, by sector
