@@ -55,6 +55,18 @@ clusters$gr_wat_productivity <- exactextractr::exact_extract(groundwater_Product
 clusters$gr_wat_depth = ifelse(clusters$gr_wat_depth<0, 0, clusters$gr_wat_depth)
 clusters$surfw_dist = ifelse(is.na(clusters$surfw_dist), 1000000, clusters$gr_wat_depth)
 
+gr_wat_depth_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=gr_wat_depth))+
+  scale_fill_viridis_c(trans="log", name="Mean groundwater depth (m)")
+
+gr_wat_productivity_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=gr_wat_productivity))+
+  scale_fill_viridis_c(trans="log", name="Mean groundwater recharge (l/s)")
+
+gr_wat_storage_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=gr_wat_storage))+
+  scale_fill_viridis_c(trans="log", name="Mean groundwater storage (mm)")
+
 # Calculate groundwater pump flow rate required in m3/s as the maximum requirement of 12 months
 for (i in c(1:12)){
   aa <- clusters
@@ -203,3 +215,8 @@ for (k in 1:12){
     
     clusters[paste0('er_kwh_' , as.character(k) , "_" , as.character(i))] <- ifelse(is.na(aa[paste0('er_kwh_' , as.character(k) , "_" , as.character(i))]), 0, pull(aa[paste0('er_kwh_' , as.character(k) , "_" , as.character(i))]))
   }}
+
+groundwater_pumping_monthly_electricity <- ggplot(data=clusters %>% dplyr::select(starts_with("er_kwh_tt")) %>% gather(., key="key", value="value", 1:12))+
+  geom_sf(aes(fill=value))+
+  scale_fill_viridis_c(trans="log")+
+  facet_wrap(vars(key))

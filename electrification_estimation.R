@@ -11,39 +11,48 @@ Sys.sleep(1)
 
 nl20 = nl20$where(nl20$lt(0.37), zero)$clip(gaul)
 
-pop15 = ee$Image('users/giacomofalchetta/hrsl_images')$clip(gaul)
+pop = ee$Image('users/giacomofalchetta/hrsl_images')$clip(gaul)
 
-pop20_noaccess = pop15$mask(pop15$gt(0)$And(nl20$eq(0)))$clip(gaul)
+popnoaccess = pop15$mask(nl20$eq(0))$clip(gaul)
 
-popnoaccess2018 <- ee_as_raster(
-  image = pop20_noaccess,
+popnoaccess <- ee_as_raster(
+  image = popnoaccess,
   region = gaul$geometry(),
   via = "drive",
   scale = 1000
 )
 
-population <- ee_as_raster(
-  image = pop15,
+clusters$noacc <- exactextractr::exact_extract(popnoaccess, clusters, fun="sum")
+
+pop <- ee_as_raster(
+  image = pop,
   region = gaul$geometry(),
   via = "drive",
   scale = 1000
 )
 
-clusters$pop <- exactextractr::exact_extract(population, clusters, fun="sum")
-clusters$noacc <- exactextractr::exact_extract(popnoaccess2018, clusters, fun="sum")
+clusters$pop <- exactextractr::exact_extract(pop, clusters, fun="sum")
+
+# estimate electrification rate of each cluster
+clusters$elrate <- 1- (clusters$noacc/clusters$pop)
 
 # adjust
 somma = sum(clusters$pop)
 spread = ((national_official_population-somma)/somma)
-print(spread)
 clusters$pop <- clusters$pop * (1+spread)
-
 
 somma = sum(clusters$noacc)
 spread = (((national_official_population*(1-national_official_elrate))-somma)/somma)
-print(spread)
 clusters$noacc <- clusters$noacc * (1+spread)
 
-# estimate electrification rate of each cluster
-clusters$elrate <- 1- (clusters$noacc/clusters$pop)
-clusters$elrate <- ifelse(clusters$elrate < 0, 0, clusters$elrate)
+elrate_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=elrate))+
+  scale_fill_viridis_c(trans="log", name="Electr. acc. rate (2019 estimate)")
+
+pop_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=pop))+
+  scale_fill_viridis_c(trans="log")
+
+noacc_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=noacc))+
+  scale_fill_viridis_c(trans="log")

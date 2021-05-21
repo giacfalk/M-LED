@@ -90,7 +90,7 @@ hc_5_app_cost = 611450
 #####################
 
 #
-#clusters = read_sf(paste0(home_repo_folder , 'clusters_final.gpkg'))
+clusters <- read_sf(paste0(home_repo_folder , 'clusters_final.gpkg'))
 
 #
 provinces <- read_sf(paste0(db_folder, '/input_folder/KEN_8_provinces.shp'))
@@ -100,8 +100,6 @@ gadm0 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_0.shp'))
 gadm1 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_1.shp'))
 gadm2 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_2.shp'))
 gadm3 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_3.shp'))
-
-clusters = gadm2
 
 # Define extent of country analysed
 ext = extent(gadm0)

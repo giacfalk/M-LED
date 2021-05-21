@@ -14,11 +14,13 @@ function_sens <- function(x){
   a <-(1/mean(x))
 }
 
-Tr <- transition(friction, function_sens, 8) 
-saveRDS(Tr, "study.area.T_kenya.rds")
-T.GC <- geoCorrection(Tr)                    
-saveRDS(T.GC, "study.area.T.GC_kenya.rds")
+# Tr <- transition(friction, function_sens, 8) 
+# saveRDS(Tr, "study.area.T_kenya.rds")
+# T.GC <- geoCorrection(Tr)                    
+# saveRDS(T.GC, "study.area.T.GC_kenya.rds")
 
+Tr <-readRDS(paste0(input_folder, "study.area.T.GC.rds"))
+T.GC <- readRDS(paste0(input_folder, "study.area.T.rds"))
 
 repeat {
   all = which.max(population)
@@ -36,8 +38,6 @@ repeat {
   temp <- dim(points)
   n.points <- temp[1]
   
-  T.GC <- readRDS(T.GC.filename)
-
   # Convert the points into a matrix
   xy.data.frame <- data.frame()
   xy.data.frame[1:n.points,1] <- points[,1]
@@ -46,15 +46,15 @@ repeat {
   
   # Run the accumulated cost algorithm to make the final output map. This can be quite slow (potentially hours).
   acc <- accCost(T.GC, xy.matrix)
-  acc = crop(acc, extent(population))
+  acc = projectRaster(acc, population)
   
   population <- overlay(population, acc, fun = function(x, y) {
     x[y<=60] <- NA
     return(x)
   })
   
-  k_acc = cellStats(population, fun='sum', na.rm = TRUE)/totalpopulationconstant
-  print(paste0("Fraction of populationulation more than 60 minutes away from healthcare: ", k_acc))
+  k_acc = cellStats(population, stat='sum', na.rm = TRUE)/totalpopulationconstant
+  print(paste0("Fraction of populationulation more than 60 minutes away:", k_acc))
   # exit if the condition is met
   if (k_acc==0) break
   
@@ -135,3 +135,5 @@ pol$populationsum = pp
 pol$id = paste0("cl", 1:nrow(pol))
 
 write_sf(pol, paste0(home_repo_folder, 'clusters_final.gpkg'))
+
+clusters <- pol

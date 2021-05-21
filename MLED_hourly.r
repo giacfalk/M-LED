@@ -16,16 +16,16 @@ source("backend.R", echo = F)
 timestamp()
 source("manual_parameters.R", echo = F)
 
+# Select the scenario to be operated
+timestamp()
+source("scenario_baseline.R", echo = F)
+#save.image(file="bk1.Rdata")
+
 # Run population clustering (choose travel-time based on contiguity-based clustering)
 timestamp()
 #source("traveltime_based_clustering.R", echo = F)
 #source("contiguity_based_clustering.R", echo = F)
 ##save.image(file="bk1.Rdata")
-
-# Select the scenario to be operated
-timestamp()
-source("scenario_baseline.R", echo = F)
-#save.image(file="bk1.Rdata")
 
 # Estimate electrification
 timestamp()

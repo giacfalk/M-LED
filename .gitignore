@@ -123,3 +123,8 @@ archive/clustering/clusters_60min_1km.dbf
 *.RData
 errori.txt
 todo.R
+Sub_County_Kenya_with_demographics.dbf
+Sub_County_Kenya_with_demographics.prj
+Sub_County_Kenya_with_demographics.shp
+Sub_County_Kenya_with_demographics.shx
+Sub_County_Kenya_with_demographics.zip

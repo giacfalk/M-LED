@@ -1,26 +1,26 @@
 for (i in 1:12){
-  assign(paste0('rur1' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-1/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('rur1' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-1/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('rur2' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-2/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('rur2' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-2/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('rur3' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-3/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('rur3' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-3/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('rur4' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-4/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('rur4' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-4/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('rur5' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-5/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('rur5' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Rural/Outputs/Tier-5/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
 
 }
 
 for (i in 1:12){
-  assign(paste0('urb1' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-1/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('urb1' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-1/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('urb2' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-2/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('urb2' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-2/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('urb3' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-3/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('urb3' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-3/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('urb4' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-4/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('urb4' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-4/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
-  assign(paste0('urb5' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-5/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/100)) 
+  assign(paste0('urb5' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_households/Urban/Outputs/Tier-5/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) 
   
 }
 
@@ -127,13 +127,13 @@ clusters$ISO = as.factor("KE")
 # clusters$acc_pop_t3_new =  clusters$acc_pop_share_t3_new * clusters$noacc
 # clusters$acc_pop_t4_new =  clusters$acc_pop_share_t4_new * clusters$noacc
 
-clusters$acc_pop_t1_new =  clusters$acc_pop_share_t1 * clusters$noacc
-clusters$acc_pop_t2_new =  clusters$acc_pop_share_t2 * clusters$noacc
-clusters$acc_pop_t3_new =  clusters$acc_pop_share_t3 * clusters$noacc
-clusters$acc_pop_t4_new =  clusters$acc_pop_share_t4 * clusters$noacc
-
 # Calculate number of households in each cluster
-clusters$HHs = ifelse(clusters$isurban>=12, clusters$pop/3.5, clusters$pop/4.5)
+clusters$HHs = ifelse(clusters$isurban>=12, clusters$noacc/3.5, clusters$noacc/4.5)
+
+clusters$acc_pop_t1_new =  clusters$acc_pop_share_t1 * clusters$HHs
+clusters$acc_pop_t2_new =  clusters$acc_pop_share_t2 * clusters$HHs
+clusters$acc_pop_t3_new =  clusters$acc_pop_share_t3 * clusters$HHs
+clusters$acc_pop_t4_new =  clusters$acc_pop_share_t4 * clusters$HHs
 
 for (m in 1:12){
   for (i in 1:24){
@@ -149,25 +149,24 @@ aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-idx = which(grepl("PerHHD_", colnames(aa))==TRUE)
-clusters$PerHHD_tt = rowSums(aa[idx])
-
 for (m in 1:12){
   
   aa <- clusters
   aa$geometry=NULL
   aa$geom=NULL
   
-    idx = which(grepl(paste0("PerHHD_", as.character(m)), colnames(clusters))==TRUE) 
-    clusters[paste0('PerHHD_tt' ,"_monthly_" , as.character(m))] = rowSums(aa[idx])
+  out = aa %>% dplyr::select(starts_with(paste0("PerHHD_", as.character(m), "_"))) %>% rowSums(.)
+  clusters[paste0('PerHHD_tt' ,"_monthly_" , as.character(m))] = out
 }
 
-for (m in 1:12){
-  for (i in 1:24){
-    
-    aa <- clusters
-    aa$geometry=NULL
-    aa$geom=NULL
-    
-    clusters[paste0('PerHHD_' , as.character(m) , "_" , as.character(i))] = pull(aa[paste0('PerHHD_' , as.character(m) , "_" , as.character(i))]) / pull(aa[paste0('PerHHD_tt' ,"_monthly_" , as.character(m))])
-}}
+aa <- clusters
+aa$geometry=NULL
+aa$geom=NULL
+
+out = aa %>% dplyr::select(starts_with("PerHHD_tt_monthly_")) %>% rowSums(.)
+clusters$PerHHD_tt = out
+
+residential_monthly_demand <- ggplot(data=clusters %>% dplyr::select(starts_with("PerHHD_tt_monthly_")) %>% gather(., key="key", value="value", 1:12))+
+  geom_sf(aes(fill=value/1e6))+
+  scale_fill_viridis_c(trans="log", name="GWh")+
+  facet_wrap(vars(key))

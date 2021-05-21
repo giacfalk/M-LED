@@ -17,3 +17,5 @@ task_vector$start()
 ee_monitoring(task_vector) # optional
 pr <- read_sf(ee_drive_to_local(task = task_vector))
 write_sf(pr, paste0(home_repo_folder, 'clusters_final.gpkg'))
+
+clusters <- pr

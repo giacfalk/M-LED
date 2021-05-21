@@ -9,16 +9,23 @@
 # cropland_extent <- projectRaster(cropland_extent, crs="+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs")
 # clusters <- st_transform(clusters, 3395)
 
-
 # Cropland in each cluster in hectares
 clusters$cr_ha_count <- exactextractr::exact_extract(cropland_extent, clusters, fun="count")
 clusters$cr_ha_count <- clusters$cr_ha_count * 900 * 0.0001
+
+cr_ha_count_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=cr_ha_count))+
+  scale_fill_viridis_c(trans="log", name="Cropland (ha)")
 
 # Area of each cluster
 clusters$area <- as.vector(st_area(clusters)) * 0.0001
 
 # Share of cropland over total cluster area
 clusters$crshare <- clusters$cr_ha_count / clusters$area
+
+crshare_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=crshare))+
+  scale_fill_viridis_c(trans="log")
 
 #clusters <- st_transform(clusters, 4326)
 
@@ -47,9 +54,21 @@ for (X in files){
   clusters <- clusters %>%  mutate(!!a := (!!as.name(a)) * crshare_sp) 
 }
 
+whea_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=A_whea))+
+  scale_fill_viridis_c(trans="log")
+
+whea_share_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=A_whea/cr_ha_count))+
+  scale_fill_viridis_c(trans="log")
+
 # Irrigation water requirements
 
 clusters$clima_zone <- exactextractr::exact_extract(climatezones, clusters, fun="majority")
+
+clima_zone_plot <- ggplot(data=clusters)+
+  geom_sf(aes(fill=as.factor(clima_zone)))+
+  scale_fill_discrete(name="Agro-ecological zone")
 
 # List of months in the year
 list_months = c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
@@ -63,11 +82,20 @@ ppt <- exactextractr::exact_extract(ppt, clusters, fun="mean")
 
 colnames(ppt) <- gsub("PET", "PPT", colnames(pet))
 
-soil <- exactextractr::exact_extract(soil, clusters, fun="mean")
+# soil <- exactextractr::exact_extract(soil, clusters, fun="mean")
+# colnames(soil) <- gsub("PET", "MOI", colnames(pet))
 
-colnames(soil) <- gsub("PET", "MOI", colnames(pet))
+clusters <- bind_cols(clusters, pet, ppt)
 
-clusters <- bind_cols(clusters, pet, ppt, soil)
+pet_plot <- ggplot(data=clusters %>% dplyr::select(starts_with("PET")) %>% gather(., key="key", value="value", 1:12))+
+  geom_sf(aes(fill=value))+
+  scale_fill_viridis_c(trans="log")+
+  facet_wrap(vars(key))
+
+ppt_plot <- ggplot(data=clusters %>% dplyr::select(starts_with("PPT")) %>% gather(., key="key", value="value", 1:12))+
+  geom_sf(aes(fill=value))+
+  scale_fill_viridis_c(trans="log", name="Monthly mean ppt")+
+  facet_wrap(vars(key))
 
 # Define crop factor for each day of the year based on sum of beginning of growing seasons and length of each growing period
 for (i in 1:nrow(crops)){
@@ -112,7 +140,7 @@ aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-clusters[paste0('monthly_ET_' , as.character(crops[i,1]) , "_" , as.character(z))] = as.vector(aa %>%  select(starts_with(paste0('ET_' , as.character(crops[i,1]) , "_" , as.character(z) , '_')))) %>% rowSums(na.rm = T) %>% as.numeric()
+clusters[paste0('monthly_ET_' , as.character(crops[i,1]) , "_" , as.character(z))] = as.vector(aa %>%  dplyr::select(starts_with(paste0('ET_' , as.character(crops[i,1]) , "_" , as.character(z) , '_')))) %>% rowSums(na.rm = T) %>% as.numeric()
   
 aa <- clusters
 aa$geometry=NULL
@@ -152,14 +180,24 @@ aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-clusters['IRREQ_year'] =  as.numeric(aa %>%  select(starts_with("monthly_IRREQ_")) %>% rowSums(na.rm = T))
+clusters['IRREQ_year'] =  as.numeric(aa %>%  dplyr::select(starts_with("monthly_IRREQ_")) %>% rowSums(na.rm = T))
 
 aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
 for (z in 1:12){  
-  a = aa %>%  select(starts_with("monthly_IRREQ_"))
-a2 = a %>%  select(ends_with(paste0("_", as.character(z))))
+  a = aa %>%  dplyr::select(starts_with("monthly_IRREQ_"))
+a2 = a %>%  dplyr::select(ends_with(paste0("_", as.character(z))))
 clusters[paste0('monthly_IRREQ' , "_" , as.character(z))] = as.numeric(rowSums(a2, na.rm = T))
 }
+
+monthly_irreq_plot <- ggplot(data=clusters %>% dplyr::select(starts_with("monthly_IRREQ_")) %>% gather(., key="key", value="value", 1:12))+
+  geom_sf(aes(fill=value))+
+  scale_fill_viridis_c(trans="log", name="Monthly irrig. wat. req. (m3)")+
+  facet_wrap(vars(key))
+
+monthly_irreq_dens_plot <- ggplot(data=clusters %>% dplyr::select(starts_with("monthly_IRREQ_")) %>% gather(., key="key", value="value", 1:12) %>% mutate(value=value/clusters$cr_ha_count))+
+  geom_sf(aes(fill=value))+
+  scale_fill_viridis_c(trans="log", name="Monthly irrig. wat. req. (m3/ha)")+
+  facet_wrap(vars(key))
