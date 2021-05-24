@@ -27,7 +27,7 @@ for (i in 1:12){
 
 
 for (i in 1:12){
-  assign(paste0('edu' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_services/2.School/Output/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000/10)) #/10 schools simulated 
+  assign(paste0('edu' , "_" , as.character(i)), read.csv(paste0(home_repo_folder , 'ramp/RAMP_services/2.School/Output/output_file_' , as.character(i) , '.csv')) %>% rename(values = X0, minutes = X) %>% mutate(hour=minutes%/%60%%24) %>% group_by(hour) %>% summarise(values=mean(values)/1000)) #/10 schools simulated 
 
 }
 
@@ -38,7 +38,7 @@ for (m in 1:12){
     aa$geometry=NULL
     aa$geom=NULL
     
-    clusters = mutate(clusters, !!paste0('er_hc_' , as.character(m) , "_" , as.character(i)) := pull(!!as.name(paste0('health1', "_" , as.character(m))))[i] * clusters$beds_1 + pull(!!as.name(paste0('health2', "_" , as.character(m))))[i]/45 * clusters$beds_2 + pull(!!as.name(paste0('health3', "_" , as.character(m))))[i]/150 * clusters$beds_3 + pull(!!as.name(paste0('health4', "_" , as.character(m))))[i] /450 * clusters$beds_4 + pull(!!as.name(paste0('health5', "_" , as.character(m))))[i]/2000 * clusters$beds_5)
+    clusters = mutate(clusters, !!paste0('er_hc_' , as.character(m) , "_" , as.character(i)) := pull(!!as.name(paste0('health1', "_" , as.character(m))))[i] * clusters$beds_1 + pull(!!as.name(paste0('health2', "_" , as.character(m))))[i] * clusters$beds_2 + pull(!!as.name(paste0('health3', "_" , as.character(m))))[i] * clusters$beds_3 + pull(!!as.name(paste0('health4', "_" , as.character(m))))[i] * clusters$beds_4 + pull(!!as.name(paste0('health5', "_" , as.character(m))))[i] * clusters$beds_5)
             
     aa <- clusters
     aa$geometry=NULL

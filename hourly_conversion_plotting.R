@@ -188,7 +188,7 @@ sf_edu = dplyr::select(sf_edu, hour, value, month) %>% group_by(hour, month) %>%
 
 sf_edu$hour = as.numeric(sf_edu$hour)
 
-edu<-ggplot(sf_edu, aes(x=as.numeric(hour), y=value/10000))+
+edu<-ggplot(sf_edu, aes(x=as.numeric(hour), y=value/1000))+
   theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
@@ -239,7 +239,7 @@ sf_residential = dplyr::select(sf_residential, hour, value, month) %>% group_by(
 
 sf_residential$hour = as.numeric(sf_residential$hour)
 
-residential <-ggplot(sf_residential, aes(x=as.numeric(hour), y=value/10000000))+
+residential <-ggplot(sf_residential, aes(x=as.numeric(hour), y=value/1000))+
   theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
@@ -292,7 +292,7 @@ sf_residual_productive = dplyr::select(sf_residual_productive, hour, value, mont
 
 sf_residual_productive$hour = as.numeric(sf_residual_productive$hour)
 
-residual_productive <-ggplot(sf_residual_productive, aes(x=as.numeric(hour), y=value/100000000))+
+residual_productive <-ggplot(sf_residual_productive, aes(x=as.numeric(hour), y=value/1000))+
   theme_classic()+
   geom_line(aes(group=as.factor(month), colour=as.factor(month)), size=1)+
   #facet_wrap(~Sector)+
@@ -319,12 +319,12 @@ Crop_processing<-sum(crop_pro$data$value_cropproation)*30
 Comm_prod <- sum(residual_productive$data$value)*30
 
 print("Latent demand (estimated) TWh:")
-sum(Residential, Education, Healthcare, Irrigation, Crop_processing, Comm_prod)/1000000000  
+sum(Residential, Education, Healthcare, Irrigation, Crop_processing, Comm_prod)/1e6  
 
 df <- as.data.frame(rbind(Residential, Education, Healthcare, Irrigation, Crop_processing, Comm_prod))
 df$sector<-rownames(df)
 
-barplot <- ggplot(df, aes(x=sector, y=V1/1000000000))+
+barplot <- ggplot(df, aes(x=sector, y=V1/1e6))+
   theme_classic()+
   geom_col(aes(fill=sector))+
   scale_y_continuous(name="Yearly unmet electricity demand (TWh)")+
@@ -402,7 +402,7 @@ gadm1 <- gather(gadm1, key = "sector", value = "value", 12:17)
 
 gadm1$countryiso3 <- ifelse(gadm1$NAME_1==countryiso3, 0, 1)
 
-barplot_prov <- ggplot(gadm1, aes(x=NAME_1, y=value/100000000))+
+barplot_prov <- ggplot(gadm1, aes(x=NAME_1, y=value/1e9))+
   theme_classic()+
   geom_bar(aes(fill=sector), position = "stack", stat = "identity", colour="black", lwd=0.01)+
   scale_y_continuous(name="Yearly latent electricity demand (TWh)")+

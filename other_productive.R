@@ -29,7 +29,7 @@ aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-clusters['kwh_cp_tt'] = as.vector(aa %>%  select(starts_with('kwh')) %>% rowSums(na.rm = T) %>% as.numeric())
+clusters['kwh_cp_tt'] = as.vector(aa %>%  dplyr::select(starts_with('kwh')) %>% rowSums(na.rm = T) %>% as.numeric())
 
 # processing to take place in post-harvesting months: for each crop 1) take harvesting date 2) take plantation months. for those months between 1 and 2 equally allocate crop processing
 
@@ -63,7 +63,7 @@ for (z in 1:12){
   aa$geometry=NULL
   aa$geom=NULL
   
-  aa <- aa %>% select(starts_with('kwh_cp')) %>% select(ends_with(paste0('_' , as.character(z)))) %>% mutate(a=rowSums(., na.rm = T))
+  aa <- aa %>% dplyr::select(starts_with('kwh_cp')) %>% dplyr::select(ends_with(paste0('_' , as.character(z)))) %>% mutate(a=rowSums(., na.rm = T))
   
   clusters = clusters %>% mutate(!!as.name(paste0('monthly_kwh_cropproc', "_" , as.character(z))) := as.vector(aa$a))
   
