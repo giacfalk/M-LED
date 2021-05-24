@@ -1,7 +1,5 @@
 totalpopulationconstant = sum(values(population), na.rm=T)
 
-T.filename <- 'study.area.T_kenya.rds'
-T.GC.filename <- 'study.area.T.GC_kenya.rds'
 friction <- raster(paste0(input_folder, "friction_cut_1209.tif"))
 friction <- projectRaster(friction, population)
 
@@ -10,20 +8,21 @@ friction <- overlay(friction, population, fun = function(x, y) {
   return(x)
 })
 
+population <- aggregate(population, fact=10, fun="sum")
+friction <- aggregate(friction, fact=10, fun="mean")
+
 function_sens <- function(x){
   a <-(1/mean(x))
 }
 
-# Tr <- transition(friction, function_sens, 8) 
-# saveRDS(Tr, "study.area.T_kenya.rds")
-# T.GC <- geoCorrection(Tr)                    
-# saveRDS(T.GC, "study.area.T.GC_kenya.rds")
-
-Tr <-readRDS(paste0(input_folder, "study.area.T.GC.rds"))
-T.GC <- readRDS(paste0(input_folder, "study.area.T.rds"))
+Tr <- transition(friction, function_sens, 8) 
+saveRDS(Tr, "study.area.T_kenya.rds")
+T.GC <- geoCorrection(Tr)                    
+saveRDS(T.GC, "study.area.T.GC_kenya.rds")
 
 repeat {
   all = which.max(population)
+  print(all)
   pos = as.data.frame(xyFromCell(population, all))
   
   new_facilities <- if(exists("new_facilities")){
@@ -48,20 +47,17 @@ repeat {
   acc <- accCost(T.GC, xy.matrix)
   acc = projectRaster(acc, population)
   
-  population <- overlay(population, acc, fun = function(x, y) {
-    x[y<=60] <- NA
-    return(x)
-  })
+  values(population)[which(values(acc<=60))] <- NA
+  values(population)[all] <- NA
   
   k_acc = cellStats(population, stat='sum', na.rm = TRUE)/totalpopulationconstant
   print(paste0("Fraction of populationulation more than 60 minutes away:", k_acc))
   # exit if the condition is met
-  if (k_acc==0) break
+  if (k_acc<=0.05) break
   
 }
 
 kenya <- gadm0
-
 kenya <- st_cast(kenya, "POLYGON") %>% st_union()
 
 prova <- new_facilities %>% 
@@ -69,71 +65,8 @@ prova <- new_facilities %>%
   st_voronoi(., envelope = kenya, dTolerance = 0, bOnlyEdges = FALSE) %>%
   st_collection_extract()
 
-write_sf(prova, 'prova.shp')
+prova <- st_intersection(prova, kenya)
 
-##############
+write_sf(prova, paste0(home_repo_folder, 'clusters_final.gpkg'))
 
-new_facilities$id = 1:nrow(new_facilities)
-
-cluster <- makePSOCKcluster(detectCores()-1)
-
-clusterExport(cl=cluster, c("new_facilities", "T.GC","population",
-                            "st_coordinates","accCost","aggregate",
-                            "extent","overlay","cellStats","crop", "rasterToPolygons", "st_as_sf", "st_sf", "mutate", "st_union"))
-
-functpopulation<-parLapply(cluster,1:nrow(new_facilities),function(i){
-  id_exp = new_facilities[i, ]$id
-  xy.matrix <-st_coordinates(new_facilities[i, ])
-  servedpopulation <- accCost(T.GC, xy.matrix)
-  threshold = 60
-  servedpopulation[servedpopulation>threshold] <- NA
-  p <- rasterToPolygons(servedpopulation, n=16, na.rm=TRUE, digits=1, dissolve=TRUE)
-  
-  # assign id to polygon = i
-  p = st_as_sf(p)
-  p = st_union(p) 
-  p = st_sf(p)
-  p$id = id_exp
-  p
-})
-
-stopCluster(cluster)
-
-for (i in 1:length(functpopulation)){
-  if (class(functpopulation[[i]]$p)[1]=="sfc_MULTIPOLYGON"){
-    print(i)
-    functpopulation[[i]] <- st_cast(functpopulation[[i]], "POLYGON")
-  }
-  functpopulation[[i]]  <- functpopulation[[i]] [c("p", "id")]
-}
-
-functpopulation2<-sf::st_as_sf(data.table::rbindlist(functpopulation))
-
-nf_temp = new_facilities
-nf_temp$geometry = NULL
-nf_temp = dplyr::select(nf_temp, id) %>% as.data.frame()
-
-pol = merge(nf_temp , functpopulation2, by="id") %>% st_as_sf(.)
-
-cluster <- makePSOCKcluster(detectCores()-1)
-clusterExport(cl=cluster, c("pol", "st_sf", "filter",
-                            "exact_extract","st_intersection","st_intersects", "population", "%>%", "st_geometry_type", "st_cast"))
-
-#timestamp()
-pp = mclapply(1:nrow(pol),function(i){
-  b<-st_intersects(pol[i,], pol[-i,])
-  a<-sf::st_touches(pol[i,], pol[-i,])
-  ifelse(length(setdiff(b[1][[1]], a[1][[1]]))==0, exact_extract(population, pol[i,], 'sum'), exact_extract(population, pol[i,], 'sum')*ifelse(length(as.numeric(st_area(st_difference(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),])))))!=0, as.numeric(st_area(st_difference(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))/as.numeric(st_area(pol[i,])), 0) + exact_extract(population, pol[i,], 'sum')*ifelse(length(as.numeric(st_area(st_intersection(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))!=0), as.numeric(st_area(st_intersection(pol[i,], st_union(pol[setdiff(b[1][[1]], a[1][[1]]),]))))/as.numeric(st_area(pol[i,]))/length(setdiff(b[1][[1]], a[1][[1]])),0))
-})
-#timestamp()
-
-stopCluster(cluster)
-
-pp = do.call(rbind, pp)
-pol$populationsum = pp
-
-pol$id = paste0("cl", 1:nrow(pol))
-
-write_sf(pol, paste0(home_repo_folder, 'clusters_final.gpkg'))
-
-clusters <- pol
+clusters <- prova
