@@ -13,7 +13,7 @@ nl20 = nl20$where(nl20$lt(0.37), zero)$clip(gaul)
 
 pop = ee$Image('users/giacomofalchetta/hrsl_images')$clip(gaul)
 
-popnoaccess = pop15$mask(nl20$eq(0))$clip(gaul)
+popnoaccess = pop$mask(nl20$eq(0))$clip(gaul)
 
 popnoaccess <- ee_as_raster(
   image = popnoaccess,

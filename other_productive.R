@@ -29,7 +29,7 @@ aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-clusters['kwh_cp_tt'] = as.vector(aa %>%  dplyr::select(starts_with('kwh')) %>% rowSums(na.rm = T) %>% as.numeric())
+clusters$kwh_cp_tt = as.vector(aa %>%  dplyr::select(starts_with('kwh')) %>% rowSums(na.rm = T) %>% as.numeric())
 
 # processing to take place in post-harvesting months: for each crop 1) take harvesting date 2) take plantation months. for those months between 1 and 2 equally allocate crop processing
 
@@ -48,12 +48,19 @@ for (i in 1:nrow(crops)){
     a =  filter(daily, date>= pm1 + as.numeric(crops[i, 'nd_1']) + as.numeric(crops[i, 'nd_2']) + as.numeric(crops[i, 'nd_3']) + as.numeric(crops[i, 'nd_4']))
     a =  filter(a, date < as.Date("2020-03-15", format="%Y-%m-%d"))
     a =  filter(a, lubridate::month(month) == m)
-    a = nrow(a)
+    a = unique(a$month)
+
+        aa <- clusters
+    aa$geometry=NULL
+    aa$geom=NULL
+    
+    clusters[paste0("kwh_cp" , as.character(crops$crop[i]) , "_" , as.character(m))] = pull(aa[paste0("kwh_" , as.character(crops$crop[i]) , "_tot")]) / ifelse(length(a)==0, 0, a)
+    
     aa <- clusters
     aa$geometry=NULL
     aa$geom=NULL
     
-    clusters[paste0("kwh_cp" , as.character(crops$crop[i]) , "_" , as.character(m))] = aa[paste0("kwh_" , as.character(crops$crop[i]) , "_tot")] / a
+    clusters[paste0("kwh_cp" , as.character(crops$crop[i]) , "_" , as.character(m))]  = ifelse(is.infinite(pull(aa[paste0("kwh_cp" , as.character(crops$crop[i]) , "_" , as.character(m))])), 0, pull(aa[paste0("kwh_cp" , as.character(crops$crop[i]) , "_" , as.character(m))]))
     
   }}
 
@@ -79,6 +86,10 @@ for (k in 1:12){
   
   clusters[paste0('kwh_cropproc_tt_', as.character(k))] = pull(aa[paste0('monthly_kwh_cropproc' , "_" , as.character(k))])/30
   
+  aa <- clusters
+  aa$geometry=NULL
+  aa$geom=NULL
+  
 }
 
 for (k in 1:12){
@@ -92,17 +103,17 @@ for (k in 1:12){
     
   }}
 
-for (k in 1:12){
-  for (i in 1:24){
-    
-    aa <- clusters
-    aa$geometry=NULL
-    aa$geom=NULL
-    
-    clusters[paste0('kwh_cropproc' , as.character(k) , "_" ,  as.character(i))] = pull(aa[paste0('kwh_cropproc' , as.character(k) , "_" ,  as.character(i))])/pull(aa[paste0('kwh_cropproc_tt_' , as.character(k))])
-    
-  }}
+aa <- clusters
+aa$geometry=NULL
+aa$geom=NULL
 
+out = aa %>% dplyr::select(starts_with("kwh_cropproc_tt_")) %>% rowSums(.)
+clusters$kwh_cropproc_tt = out
+
+crop_proc_monthly_demand <- ggplot(data=clusters %>% dplyr::select(starts_with("kwh_cropproc_tt_")) %>% gather(., key="key", value="value", 1:12))+
+  geom_sf(aes(fill=value/1e6))+
+  scale_fill_viridis_c(trans="log", name="GWh")+
+  facet_wrap(vars(key))
 
 ####
 
@@ -118,8 +129,6 @@ clusters$roadslenght[match(names(roadslenght),clusters$id)] = roadslenght
 clusters$traveltime = exact_extract(traveltime, clusters, 'mean')
 
 # calculate employment rate in each cluster
-clusters$fid=NULL
-
 clusters2 <- dplyr::select(clusters, id)
 
 result <- qgis_run_algorithm(
@@ -139,7 +148,7 @@ clusters2$geom<- NULL
 clusters2$geometry<- NULL
 clusters2 <- clusters2[!duplicated(clusters2[,c('id')]),]
 clusters2 <- dplyr::select(clusters2, -id) 
-clusters <- dplyr::select(clusters, -starts_with("HCW")) 
+clusters2 <- dplyr::select(clusters2, -starts_with("HCW")) 
 clusters2 <- bind_cols(clusters, clusters2)
 
 # run PCA
@@ -192,7 +201,6 @@ hist <- tidyr::gather(hist, key="var", value="value", 1:5)
 # 
 
 clusters_prod <- cbind(clusters, PCs$PCav)
-clusters_prod$PCs.PCav <- scales::rescale(clusters_prod$PCs.PCav, to = c(0.6, 0.3))
 
 #ggplot(clusters)+
 #geom_clusters(aes(fill=PCs.PCav))
@@ -264,5 +272,17 @@ clusters_prod <- mutate(clusters_prod, !!paste0("residual_productive_tt_", m) :=
 }
 
 clusters <- clusters_prod
+
+aa <- clusters
+aa$geometry=NULL
+aa$geom=NULL
+
+out = aa %>% dplyr::select(starts_with("residual_productive_tt_")) %>% rowSums(.)
+clusters$residual_productive_tt = out
+
+commprod_monthly_demand <- ggplot(data=clusters %>% dplyr::select(starts_with("residual_productive_tt_")) %>% gather(., key="key", value="value", 1:12))+
+  geom_sf(aes(fill=value/1e6))+
+  scale_fill_viridis_c(trans="log", name="GWh")+
+  facet_wrap(vars(key))
 
 gdata::keep(clusters, gadm0, sure = T)

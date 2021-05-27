@@ -68,21 +68,17 @@ clusters$popdens <- clusters$pop / clusters$area
 
 aa <- accpop
 
-clusters['acc_pop_share_t1'] = accpop['acc_pop_t1'] / (accpop['acc_pop_t1'] + accpop['acc_pop_t2'] + accpop['acc_pop_t3'] + accpop['acc_pop_t4'])
-clusters['acc_pop_share_t2'] = accpop['acc_pop_t2'] / (accpop['acc_pop_t1'] + accpop['acc_pop_t2'] + accpop['acc_pop_t3'] + accpop['acc_pop_t4'])
-clusters['acc_pop_share_t3'] = accpop['acc_pop_t3'] / (accpop['acc_pop_t1'] + accpop['acc_pop_t2'] + accpop['acc_pop_t3'] + accpop['acc_pop_t4'])
-clusters['acc_pop_share_t4'] = accpop['acc_pop_t4'] / (accpop['acc_pop_t1'] + accpop['acc_pop_t2'] + accpop['acc_pop_t3'] + accpop['acc_pop_t4'])
-
-clusters$acc_pop_share_t1[is.nan(clusters$acc_pop_share_t1)]<-0
-clusters$acc_pop_share_t2[is.nan(clusters$acc_pop_share_t2)]<-0
-clusters$acc_pop_share_t3[is.nan(clusters$acc_pop_share_t3)]<-0
-clusters$acc_pop_share_t4[is.nan(clusters$acc_pop_share_t4)]<-0
+clusters$acc_pop_share_t1 <-  accpop$acc_pop_t1 / (accpop$acc_pop_t1 + accpop$acc_pop_t2 + accpop$acc_pop_t3 + accpop$acc_pop_t4)
+clusters$acc_pop_share_t2 = accpop$acc_pop_t2 / (accpop$acc_pop_t1 + accpop$acc_pop_t2 + accpop$acc_pop_t3 + accpop$acc_pop_t4)
+clusters$acc_pop_share_t3 = accpop$acc_pop_t3 / (accpop$acc_pop_t1 + accpop$acc_pop_t2 + accpop$acc_pop_t3 + accpop$acc_pop_t4)
+clusters$acc_pop_share_t4 = accpop$acc_pop_t4 / (accpop$acc_pop_t1 + accpop$acc_pop_t2 + accpop$acc_pop_t3 + accpop$acc_pop_t4)
 
 clusters <- bind_cols(clusters, accpop)
 
 # Spatial join between income quintiles DHS and clusters
 
 dhs <- filter(dhs, ISO=="KE")
+dhs <- dplyr::select(dhs, 1:32, 55)
 
 clusters <- st_transform(clusters, 3395)
 dhs <- st_transform(dhs, 3395)
@@ -90,7 +86,6 @@ dhs <- st_transform(dhs, 3395)
 clusters <- st_join(clusters, dhs, join = nngeo::st_nn, maxdist = 50000, k = 1) 
 
 clusters <- st_transform(clusters, 4326)
-
 
 clusters$ISO = as.factor("KE")
 
