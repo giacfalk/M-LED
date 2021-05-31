@@ -1,7 +1,7 @@
 # MLED - Multisectoral Latent Electricity Demand assessment platform
 # v1.1, R programming language
 # Hourly resolution
-# Version: 04/05/2021
+# Version: 31/05/2021
 # giacomo.falchetta@feem.it
 
 ####
@@ -24,7 +24,7 @@ source("scenario_baseline.R", echo = F)
 # Run population clustering (choose travel-time based on contiguity-based clustering)
 timestamp()
 #source("traveltime_based_clustering.R", echo = F)
-#source("contiguity_based_clustering.R", echo = F)
+source("contiguity_based_clustering.R", echo = F)
 ##save.image(file="bk1.Rdata")
 
 # Estimate electrification

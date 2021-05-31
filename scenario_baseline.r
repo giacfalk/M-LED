@@ -101,8 +101,6 @@ gadm1 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_1.shp'))
 gadm2 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_2.shp'))
 gadm3 = read_sf(paste0(input_folder , 'gadm36_' , countryiso3 , '_3.shp'))
 
-clusters = gadm1
-
 # Define extent of country analysed
 ext = extent(gadm0)
 

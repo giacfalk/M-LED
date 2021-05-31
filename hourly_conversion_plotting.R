@@ -76,7 +76,7 @@ for (i in c(0:23)){
   sf_croppro = mutate(sf_croppro, !!paste0("value", i) := load_curve_cp[i+1]*value_tt)
 }
 
-sf_croppro = tidyr::gather(sf_croppro, "hour", "value", 4:27)
+sf_croppro = tidyr::gather(sf_croppro, "hour", "value", 5:28)
 
 sf_croppro$value=as.numeric(sf_croppro$value)
 
@@ -129,15 +129,11 @@ sf_health = tidyr::gather(sf_health %>% dplyr::select(2:289, 1), "date", "value"
 sf_health$hour = as.numeric((sub('.*\\_', "", gsub("er_hc_", "", sf_health$date))))
 sf_health$month = as.numeric((sub('\\_.*', "", gsub("er_hc_", "", sf_health$date))))
 
-
 sf_health = merge(sf_health,sf_health_tt, by=c("id", "month"))
-
-sf_health$value = as.numeric(sf_health$value_tt)*as.numeric(sf_health$value)
 
 sf_health = dplyr::select(sf_health, hour, value, month) %>% group_by(hour, month) %>% summarise(value=sum(value, na.rm=T)) %>% ungroup()
 
 sf_health$hour = as.numeric(sf_health$hour)
-
 
 health<-ggplot(sf_health, aes(x=as.numeric(hour), y=value))+
   theme_classic()+
@@ -181,8 +177,6 @@ sf_edu$month = as.numeric((sub('\\_.*', "", gsub("er_sch_", "", sf_edu$date))))
 
 
 sf_edu = merge(sf_edu,sf_edu_tt, by=c("id", "month"))
-
-sf_edu$value = as.numeric(sf_edu$value_tt)*as.numeric(sf_edu$value)
 
 sf_edu = dplyr::select(sf_edu, hour, value, month) %>% group_by(hour, month) %>% summarise(value=sum(value, na.rm=T)) %>% ungroup()
 
@@ -233,8 +227,6 @@ sf_residential_tt <- as.data.table(sf_residential_tt)
 
 sf_residential = merge(sf_residential,sf_residential_tt, by=c("id", "month"))
 
-sf_residential$value = as.numeric(sf_residential$value_tt)*as.numeric(sf_residential$value)
-
 sf_residential = dplyr::select(sf_residential, hour, value, month) %>% group_by(hour, month) %>% summarise(value=sum(value, na.rm=T)) %>% ungroup()
 
 sf_residential$hour = as.numeric(sf_residential$hour)
@@ -259,23 +251,6 @@ for (i in 1:ncol(sf_residual_productive)){
   sf_residual_productive[,i] <-  ifelse(is.infinite(sf_residual_productive[,i]) | is.nan(sf_residual_productive[,i]) | is.na(sf_residual_productive[,i]) , 0, sf_residual_productive[,i])
 }
 
-sf_residual_productive$residual_productive_tt_1 = as.numeric(sf_residual_productive$residual_productive_tt_1) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_2 = as.numeric(sf_residual_productive$residual_productive_tt_2) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_3 = as.numeric(sf_residual_productive$residual_productive_tt_3) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_4 = as.numeric(sf_residual_productive$residual_productive_tt_4) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_5 = as.numeric(sf_residual_productive$residual_productive_tt_5) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_6 = as.numeric(sf_residual_productive$residual_productive_tt_6) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_7 = as.numeric(sf_residual_productive$residual_productive_tt_7) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_8 = as.numeric(sf_residual_productive$residual_productive_tt_8) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_9 = as.numeric(sf_residual_productive$residual_productive_tt_9) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_10 = as.numeric(sf_residual_productive$residual_productive_tt_10) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_11 = as.numeric(sf_residual_productive$residual_productive_tt_11) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-sf_residual_productive$residual_productive_tt_12 = as.numeric(sf_residual_productive$residual_productive_tt_12) * as.numeric(clusters$HHs) * (clusters$noacc/clusters$pop)
-
-for (i in 1:ncol(sf_residual_productive)){
-  sf_residual_productive[,i] <-  ifelse(is.infinite(sf_residual_productive[,i]) | is.nan(sf_residual_productive[,i]) | is.na(sf_residual_productive[,i]) , 0, sf_residual_productive[,i])
-}
-
 sf_residual_productive_tt = tidyr::gather(sf_residual_productive %>% dplyr::select(290:301, 1), "date_tt", "value_tt", 1:12)
 
 sf_residual_productive_tt$month = as.numeric((sub('.*\\_', "", gsub("residual_productive_tt_", "", sf_residual_productive_tt$date_tt))))
@@ -286,7 +261,7 @@ sf_residual_productive$month = as.numeric((sub('\\_.*', "", gsub("residual_produ
 
 sf_residual_productive = merge(sf_residual_productive,sf_residual_productive_tt, by=c("id", "month"))
 
-sf_residual_productive$value = as.numeric(sf_residual_productive$value_tt)*as.numeric(sf_residual_productive$value)
+sf_residual_productive$value <- sf_residual_productive$value * sf_residual_productive$value_tt
 
 sf_residual_productive = dplyr::select(sf_residual_productive, hour, value, month) %>% group_by(hour, month) %>% summarise(value=sum(value, na.rm=T)) %>% ungroup()
 

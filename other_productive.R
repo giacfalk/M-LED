@@ -250,9 +250,11 @@ clusters_residential_2 = group_by(clusters_residential, hour) %>% mutate(media =
 
 # use calculated ratios to scales::rescale load curve of productive activities for each monthly
 
-load_curve_prod_act$ï..Hour[load_curve_prod_act$ï..Hour==0] <- 24
+load_curve_prod_act[,1][load_curve_prod_act[,1]==0] <- 24
 
-load_curve_prod_act <- merge(clusters_residential_2, load_curve_prod_act,  by.x="hour", by.y="ï..Hour")
+colnames(load_curve_prod_act)[1] <- "hour"
+
+load_curve_prod_act <- merge(clusters_residential_2, load_curve_prod_act,  by.x="hour", by.y="hour")
 
 load_curve_prod_act$load_curve <- load_curve_prod_act$value * load_curve_prod_act$Share
 
