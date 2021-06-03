@@ -71,12 +71,12 @@ list$mean <- ifelse(list$mean<0, 0, list$mean)
 # Derive YG by crop by cluster (depending on the climate zone), by multiplying per ha WG by a of cluster for each crop
 
 for (crop in unique(list$crop)){
-  
+
   aa <- clusters
   aa$geometry=NULL
   aa$geom=NULL
   
-clusters <- clusters %>%  mutate(!!paste0(paste0("yg_", crop)) := (pull(!!aa[paste0("A_", crop)]))*list$mean[list$crop==crop & list$zone==clusters$climatezones]) 
+clusters <- clusters %>%  mutate(!!paste0(paste0("yg_", crop)) := (pull(!!aa[paste0("A_", crop)]))*list$mean[list$crop==crop][aa$clima_zone]) 
 
 }
 
@@ -84,7 +84,7 @@ aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-clusters$yg_total = as.vector(aa %>%  select(starts_with('yg_')) %>% rowSums(na.rm = T) %>% as.numeric())
+clusters$yg_total = as.vector(aa %>%  dplyr::select(starts_with('yg_')) %>% rowSums(na.rm = T) %>% as.numeric())
 
 # 2) Calculate potential economic revenue based on value of crops 
 ####
@@ -95,6 +95,7 @@ clusters$yg_total = as.vector(aa %>%  select(starts_with('yg_')) %>% rowSums(na.
 # Process crop prices csv and convert it to a shapefile
 prices = read.csv(paste0(input_folder, 'prices_with_coordinates.csv'))
 prices <- st_as_sf(prices, coords=c("ï..X", "Y"), crs=4326)
+colnames(prices)[2:43] <- paste0("pri_", colnames(prices)[2:43])
 
 # Merge polygons based on nearest neighbour (i.e. define the local price for each crop)
 result <- qgis_run_algorithm(
@@ -109,19 +110,25 @@ clusters <- sf::read_sf(qgis_output(result, "OUTPUT"))
 # Sum up to calculate total new local revenue (BENEFIT from YIELD DUE TO IRRIGATION)
 # NB: No yield gain possible if distance/depth thresholds to water are not met
 
-cols = grepl("pri_", colnames(clusters))
-ygs = grepl("yg", colnames(clusters))
+cols = grep("pri_", colnames(clusters), value=T)
+ygs = grep("yg", colnames(clusters), value=T)
 
-for (i in 1:lenght(cols)){
-mostsimilar <- agrep(cols[i],ygs,value=T)
-clusters["added_" + i] <- clusters[paste0("pri_", i)] * clusters[mostsimilar]
+for (i in 1:length(cols)){
+mostsimilar <- agrep(cols[i],ygs,value=T, max.distance = 3)
+
+aa <- clusters
+aa$geometry=NULL
+aa$geom=NULL
+
+clusters <- clusters %>%  mutate(!!paste0("added_", mostsimilar) := (pull(!!aa[paste0("pri_", gsub("yg_", "", mostsimilar))])) * (pull(!!aa[paste0(mostsimilar)])))
+
 }
 
 aa <- clusters
 aa$geometry=NULL
 aa$geom=NULL
 
-clusters['tt_ddvl'] = as.vector(aa %>%  select(starts_with('added_')) %>% rowSums(na.rm = T) %>% as.numeric())
+clusters$tt_ddvl = as.vector(aa %>%  dplyr::select(starts_with('added_')) %>% rowSums(na.rm = T) %>% as.numeric())
 
 # 3) Calculate transportation cost for crops
 # Formula: TC = 2 * (TTM x fuelcost x lpermin) * n
@@ -132,16 +139,15 @@ clusters$diesel_price = exact_extract(traveltime, clusters, 'mean')
 
 # impose limit travel time to market 
 clusters$remote_from_market = ifelse(clusters$traveltime_market>360, 1, 0)
-clusters$wholesalemean = ifelse(clusters$wholesalemean==1, 0, clusters$wholesalemean)
 
-clusters$transp_costs = 2 * (clusters$wholesalemean*fuel_consumption*clusters$diesel_price) * (clusters$yg_total/1000/truck_bearing_t)
+clusters$transp_costs = 2 * (clusters$traveltime_market*fuel_consumption*clusters$diesel_price) * (clusters$yg_total/1000/truck_bearing_t)
 
 # lack of market access makes the gains unprofitable
 clusters$tt_ddvl = ifelse(clusters$remote_from_market==1, 0, clusters$tt_ddvl)
 
 # 4) Calculate cost for purchasing household appliances (for both new electrified and tier shift households)
 
-clusters['appliances_cost'] = ifelse(clusters['isurbanmajority'] ==1, (urb1_app_cost * clusters['HHs'] * clusters['acc_pop_share_t1_new'] + urb2_app_cost * clusters['HHs'] * clusters['acc_pop_share_t2_new'] + urb3_app_cost * clusters['HHs'] * clusters['acc_pop_share_t3_new'] + urb4_app_cost * clusters['HHs'] * clusters['acc_pop_share_t4_new']),(rur1_app_cost * clusters['HHs'] * clusters['acc_pop_share_t1_new'] + rur2_app_cost * clusters['HHs'] * clusters['acc_pop_share_t2_new'] + rur3_app_cost * clusters['HHs'] * clusters['acc_pop_share_t3_new'] + rur4_app_cost * clusters['HHs'] *  clusters['acc_pop_share_t4_new']))
+clusters$appliances_cost = ifelse(clusters$isurban ==1, (urb1_app_cost * clusters$HHs * clusters$acc_pop_share_t1_new + urb2_app_cost * clusters$HHs * clusters$acc_pop_share_t2_new + urb3_app_cost * clusters$HHs * clusters$acc_pop_share_t3_new + urb4_app_cost * clusters$HHs * clusters$acc_pop_share_t4_new),(rur1_app_cost * clusters$HHs * clusters$acc_pop_share_t1_new + rur2_app_cost * clusters$HHs * clusters$acc_pop_share_t2_new + rur3_app_cost * clusters$HHs * clusters$acc_pop_share_t3_new + rur4_app_cost * clusters$HHs *  clusters$acc_pop_share_t4_new))
 
 # 5) Model cost of groundwater pump 
 # 5.1. estimate the cost curve that links hydraulic head H_i and the pumping capacity required Q_i based on the meta-analysis of the costs of groundwater development projects in Sub-Saharan Africa carried out in  Xenarios and Pavelic (2013).
@@ -158,18 +164,22 @@ SD = 0.002047534
 Q1 = mean_q_pump - 0.675 * SD
 Q3 = mean_q_pump + 0.675 * SD
 
-clusters['q_sust'] = as.vector(aa %>%  select(starts_with('q_sust')) %>% qlcMatrix::rowMax() %>% as.numeric())
+aa <- clusters
+aa$geometry=NULL
+aa$geom=NULL
 
-clusters['n_pumps_Q1'] = (0.33 * clusters['q_sust'])/Q1
-clusters['n_pumps_M'] = (0.33 * clusters['q_sust'])/mean_q_pump
-clusters['n_pumps_Q3'] = (0.33 * clusters['q_sust'])/Q3
+clusters$q_sust = as.vector(aa %>%  dplyr::select(starts_with('q_sust')) %>% qlcMatrix::rowMax() %>% as.numeric())
 
-clusters['TC_pumping'] = ((clusters['gr_wat_depth_mean'] * 228.1071)  + (Q1*823975) + (-21312.3*Q1*clusters['gr_wat_depth_mean']) -223.0523)*clusters['n_pumps_Q1'] + ((clusters['gr_wat_depth_mean'] * 228.1071)  + (Q3*823975) + (-21312.3*Q3*clusters['gr_wat_depth_mean']) -223.0523)*clusters['n_pumps_Q3'] + ((clusters['gr_wat_depth_mean'] * 228.1071)  + (mean_q_pump*823975) + (-21312.3*mean_q_pump*clusters['gr_wat_depth_mean']) -223.0523)*clusters['n_pumps_M']
+clusters$n_pumps_Q1 = (0.33 * clusters$q_sust)/Q1
+clusters$n_pumps_M = (0.33 * clusters$q_sust)/mean_q_pump
+clusters$n_pumps_Q3 = (0.33 * clusters$q_sust)/Q3
+
+clusters$TC_pumping = ((clusters$gr_wat_depth * 228.1071)  + (Q1*823975) + (-21312.3*Q1*clusters$gr_wat_depth) -223.0523)*clusters$n_pumps_Q1 + ((clusters$gr_wat_depth * 228.1071)  + (Q3*823975) + (-21312.3*Q3*clusters$gr_wat_depth) -223.0523)*clusters$n_pumps_Q3 + ((clusters$gr_wat_depth * 228.1071)  + (mean_q_pump*823975) + (-21312.3*mean_q_pump*clusters$gr_wat_depth) -223.0523)*clusters$n_pumps_M
 
 # 6) Cost of purchasing healthcare and education appliances
-clusters['hc_appliances_cost'] = clusters['beds1'] * hc_1_app_cost + clusters['beds2'] * hc_2_app_cost + clusters['beds3']* 0.6 * hc_3_app_cost + clusters['beds4'] * 0.3 * hc_4_app_cost + clusters['beds5'] * 0.1 * hc_5_app_cost
+clusters$hc_appliances_cost = clusters$beds1 * hc_1_app_cost + clusters$beds2 * hc_2_app_cost + clusters$beds3* 0.6 * hc_3_app_cost + clusters$beds4 * 0.3 * hc_4_app_cost + clusters$beds5 * 0.1 * hc_5_app_cost
 
-clusters['sch_appliances_cost'] = clusters['pupils1'] * sch_1_app_cost + clusters['pupils2'] * sch_2_app_cost + clusters['pupils3'] * sch_3_app_cost + clusters['pupils4'] * sch_4_app_cost + clusters['pupils5'] * sch_5_app_cost
+clusters$sch_appliances_cost = clusters$pupils1 * sch_1_app_cost + clusters$pupils2 * sch_2_app_cost + clusters$pupils3 * sch_3_app_cost + clusters$pupils4 * sch_4_app_cost + clusters$pupils5 * sch_5_app_cost
 
 # 7) Cost of crop processing
 # Define average processing costs for each crop:
@@ -190,13 +200,13 @@ clusters$tt_ddvl = ifelse(clusters$transp_costs>clusters$tt_ddvl, 0, clusters$tt
 lifetimepump = 20
 discount_rate = 0.15
 
-clusters['profit_yearly'] = clusters['tt_ddvl'] - clusters['transp_costs'] - clusters['TC_pumping']/(1+discount_rate)^lifetimepump 
+clusters$profit_yearly = clusters$tt_ddvl - clusters$transp_costs - clusters$TC_pumping/(1+discount_rate)^lifetimepump 
 
 clusters$profit_yearly = ifelse(clusters$profit_yearly<0, 0, clusters$profit_yearly)
 
 # 9) Paybacktime of electrification in each cluster
-# clusters['PBT'] = clusters['investmentreq'] / clusters['profit_yearly']
+# clusters$PBT = clusters$investmentreq / clusters$profit_yearly
 
 #print share of pop without access with PBT < 5 years
-# clusters['noaccsum'][clusters.PBT < 5].sum()  
-# clusters['noaccsum'][clusters.PBT < 5].sum()  / clusters['noaccsum'].sum()
+# clusters$noaccsum[clusters.PBT < 5].sum()  
+# clusters$noaccsum[clusters.PBT < 5].sum()  / clusters$noaccsum.sum()
