@@ -1,7 +1,3 @@
-desk_path <- file.path(Sys.getenv("USERPROFILE"),"Desktop")
-home_repo_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
-db_folder <- read.table(paste0(desk_path, "/repo_folder_path.txt"),header = F,nrows = 1)  
-
 costs<-read.csv(paste0(db_folder, '/input_folder/electric_pumps_costs.csv'))
 
 costs$Depth...m.well.=as.numeric(costs$Depth...m.well.)
@@ -17,8 +13,6 @@ summary(model)
 fun = function(x, y){
 model$coefficients[2] * x + model$coefficients[3] * y + model$coefficients[1] + x*y*model$coefficients[4]
 }
-
-library(rgl)
 
 persp3d(fun, 
         xlim = c(10, 50), ylim = c(1/1000, 10/1000))

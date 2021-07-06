@@ -4,28 +4,23 @@
 
 ![alt text](https://github.com/giacfalk/M-LED/blob/master/logo.png?raw=true)
 
-Developed by Giacomo Falchetta, Nicolò Stevanato, Paolo Cornali and Davide Mazzoni with inputs from Magda Moner-Girona, Manfred Hafner and Emanuela Colombo
-
 ####
-The platform has been developed and tested in a Windows 10 environment. 
+The platform has been developed and tested in a Windows 10 environment connected to the Internet (a connection is required to operate Google Earth Engine API calls). 
 
 ## Setting up the environment
 1. Clone the MLED repository and extract it in a custom location.
 
-2. Download the MLED_database.zip file from the M-LED Zenodo repository [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3980355.svg)](https://doi.org/10.5281/zenodo.3980355) and unzip it to a path on your local machine. **Ensure to unzip the database in a location where there are several gigabytes of space available, otherwise the process will file. This space will not be occupied permanently, but is required for the data processing to succeed.** The folder contains data for replicating the Kenya country study, as well as an 'data_sources.txt' instructions file to support for retrieving data for other countries' data.
-
-3. The M-LED platform requires PyQGIS (Python + QGIS algorithm toolbox) and R. A handy automatic wizard batch file (`.\installdependencies.cmd`) is included in the root of the M-LED repository. The file ensures that the software requirements are met on the local machine, and if they are not, it prompts the user to automatically download and install the required software and libraries. The batch will prompt the user for the path where you unzipped the MLED_database.
+2. Download the MLED_database.7z file from the M-LED Zenodo repository [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4741971.svg)](https://doi.org/10.5281/zenodo.4741971) and unzip it to a path on your local machine. **Ensure to unzip the database in a location where there are several gigabytes of space available, otherwise the process will file.** The folder contains data for replicating the Kenya country study.
+4. The M-LED platform is written in the R scientific computing language, but in some processing steps it depends on PyQGIS (Python + QGIS algorithm toolbox). A handy automatic wizard batch file (.\installdependencies.cmd) is included in the root of the M-LED repository. The file ensures that the software requirements are met on the local machine, and if they are not, it prompts the user to download and install the required software and libraries.
 
 **NB: These steps are only necessary when setting up the environment for the first time. NB2: The `.\installdependencies.cmd` file MUST be run with administrator priviledges (right click -> run as administrator)**
 
 ## Operating the platform
-1. Open QGIS and start the Python Console from the top menu (Plugins -> Python Console).
+1. Open the MLED_hourly.R in RStudio (R 3.6+)
 
-2. Navigate to the path where the cloned repository is located and open the `.\wrapper.py` file.
+3. Open the manual_parameters.R file and set the correct file path for where you have extracted the M-LED database input data and define other local parameters
 
-3. Click 'Run'
-
-4. Wait (depending on your machine's processing speed this might take up to some hours)
+3. Run the whole MLED_hourly.R script or source its individual modules
 
 ## Customising the analysis
 -> See the repo's Wiki (https://github.com/giacfalk/M-LED/wiki)
@@ -33,7 +28,7 @@ The platform has been developed and tested in a Windows 10 environment.
 ## Examining the results
 The results of the M-LED platform constist of:
 - A geodatabase (clusters_final.gpkg)
-- A collection of raster files (*.tif) with hourly, sector-specific, monthly-variant loads
+(- A collection of raster files (*.tif) with hourly, sector-specific, monthly-variant loads)
 - Figures summarising the results in the 'results_figures' folder in the repo home folder.
 
 ## Support

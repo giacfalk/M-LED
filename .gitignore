@@ -117,3 +117,15 @@ archive/image/water_demand/mirrig.nc
 archive/image/water_demand/GLANDCOVERDETAIL_30MIN.nc
 archive/image/water_demand/GFRAC_30MIN.nc
 residual_productive-DESKTOP-6BKTP84.r
+.Rproj.user
+archive/clustering/clusters_60min_1km.dbf
+*.py
+*.RData
+errori.txt
+todo.R
+Sub_County_Kenya_with_demographics.dbf
+Sub_County_Kenya_with_demographics.prj
+Sub_County_Kenya_with_demographics.shp
+Sub_County_Kenya_with_demographics.shx
+Sub_County_Kenya_with_demographics.zip
+*.R
