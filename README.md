@@ -33,5 +33,5 @@ The results of the M-LED platform constist of:
 
 ## Support
 - Open a public query on this repo.
-- Email falchetta@iiasa.at.ac
+- Email falchetta@iiasa.ac.at
 
