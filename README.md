@@ -1,3 +1,11 @@
+
+**This repository is archived, as it refers to an old version of the M-LED model**
+
+Please use the M-LED version contained in the RE4AFAGRI platform [https://github.com/iiasa/RE4AFAGRI_platform/wiki](https://github.com/iiasa/RE4AFAGRI_platform/wiki), which is mantained and documented.
+
+
+_____________________________________________
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 
 # M - LED: the Multi-Sectoral Latent Electricity Demand platform
